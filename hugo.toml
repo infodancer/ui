@@ -1,0 +1,9 @@
+# infodancer/ui is a Hugo module providing shared design tokens, base CSS, and
+# `nav` / `footer` partials. Hugo consumers import via [module.imports] in their
+# own site config. The Go html/template consumption path is documented in
+# README.md and exposed via the root Go package's embed.FS.
+
+[module]
+  [module.hugoVersion]
+    extended = false
+    min = "0.110.0"

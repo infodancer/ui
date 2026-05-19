@@ -1,0 +1,24 @@
+{{- /*
+  infodancer/ui — footer partial (Hugo variant)
+
+  Reads from Hugo site config:
+    .Site.Params.ui.brand_text     — brand mark text
+    .Site.Params.ui.copyright      — copyright / credit line
+    .Site.Menus.footer             — optional footer links
+
+  Falls back to site title and a generic copyright line when fields are
+  missing.
+*/ -}}
+{{- $brand := .Site.Params.ui.brand_text | default .Site.Title -}}
+{{- $copyright := .Site.Params.ui.copyright | default (printf "© %d %s" now.Year $brand) -}}
+<footer class="app-footer">
+  <a class="app-footer-brand" href="/">{{ $brand }}</a>
+  <span class="app-footer-copyright">{{ $copyright }}</span>
+  {{- with .Site.Menus.footer }}
+  <ul class="app-footer-links" role="list">
+    {{- range . }}
+    <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+</footer>

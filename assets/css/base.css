@@ -1,0 +1,343 @@
+/*
+ * infodancer/ui — base stylesheet
+ *
+ * Minimal reset plus sensible defaults that use the design tokens.
+ * Loads after tokens.css; consumer overrides load after this.
+ *
+ * Owns: typography baselines, link/list/code/hr defaults, basic form input
+ * appearance, and a single layout helper (.app-container).
+ * Does NOT own: nav/footer chrome (lives in the partials), component
+ * classes for cards/buttons/badges (lives in feature modules until
+ * extracted), grid system (we don't ship one).
+ */
+
+/* --- Reset ----------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* --- Document --------------------------------------------------------- */
+
+html {
+  font-size: var(--app-font-size-base);
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+}
+
+body {
+  font-family: var(--app-font-body);
+  line-height: var(--app-line-height-body);
+  color: var(--app-color-fg);
+  background-color: var(--app-color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* --- Headings --------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--app-font-display);
+  line-height: var(--app-line-height-display);
+  font-weight: 600;
+  margin-block: var(--app-space-lg) var(--app-space);
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.375rem; }
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+
+/* First-child heading in a section doesn't need a leading gap. */
+:is(h1, h2, h3, h4, h5, h6):first-child {
+  margin-block-start: 0;
+}
+
+/* --- Vertical rhythm -------------------------------------------------- */
+
+p,
+ul,
+ol,
+dl,
+blockquote,
+pre,
+hr,
+figure,
+table {
+  margin-block: var(--app-space);
+}
+
+ul,
+ol {
+  padding-inline-start: var(--app-space-lg);
+}
+
+/* --- Links ------------------------------------------------------------ */
+
+a {
+  color: var(--app-color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--app-color-accent-hover);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 2px;
+  border-radius: var(--app-radius-sm);
+}
+
+/* --- Code ------------------------------------------------------------- */
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--app-font-mono);
+  font-size: 0.9375em;
+}
+
+code {
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  padding: 0.05em 0.35em;
+  border-radius: var(--app-radius-sm);
+}
+
+pre {
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  padding: var(--app-space);
+  border-radius: var(--app-radius);
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* --- Quotes and rules ------------------------------------------------- */
+
+blockquote {
+  border-inline-start: 3px solid var(--app-color-border);
+  padding-inline-start: var(--app-space);
+  color: var(--app-color-fg-muted);
+}
+
+hr {
+  border: none;
+  border-block-start: 1px solid var(--app-color-border);
+  margin-block: var(--app-space-lg);
+}
+
+/* --- Prose helper ----------------------------------------------------- */
+
+.app-prose {
+  max-width: var(--app-max-width-prose);
+  color: var(--app-color-prose-fg);
+}
+
+/* --- Forms ------------------------------------------------------------ */
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  padding: var(--app-space-sm) var(--app-space);
+  width: 100%;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 1px;
+}
+
+button {
+  background-color: var(--app-color-accent);
+  color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-accent);
+  border-radius: var(--app-radius);
+  padding: var(--app-space-sm) var(--app-space);
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--app-color-accent-hover);
+  border-color: var(--app-color-accent-hover);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 2px;
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Layout helper ---------------------------------------------------- */
+
+.app-container {
+  max-width: var(--app-max-width-page);
+  margin-inline: auto;
+  padding-inline: var(--app-space);
+}
+
+/* --- Status colors ---------------------------------------------------- */
+
+.app-danger {
+  color: var(--app-color-danger);
+}
+
+.app-success {
+  color: var(--app-color-success);
+}
+
+/* --- Nav -------------------------------------------------------------- */
+/* Markup lives in layouts/partials/nav.html (Hugo) and partials/nav.gohtml */
+/* (Go). Both emit the same class hierarchy under .app-nav.                */
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space);
+  padding: var(--app-space-sm) var(--app-space);
+  border-block-end: 1px solid var(--app-color-border);
+  background-color: var(--app-color-bg);
+}
+
+.app-nav-brand {
+  font-family: var(--app-font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-color-fg);
+  text-decoration: none;
+}
+
+.app-nav-brand:hover {
+  color: var(--app-color-fg);
+}
+
+.app-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-nav-links a {
+  color: var(--app-color-fg);
+  text-decoration: none;
+}
+
+.app-nav-links a:hover {
+  color: var(--app-color-accent);
+}
+
+.app-nav-auth {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+}
+
+.app-nav-user {
+  color: var(--app-color-fg-muted);
+}
+
+/* --- Footer ----------------------------------------------------------- */
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space);
+  padding: var(--app-space) var(--app-space);
+  border-block-start: 1px solid var(--app-color-border);
+  color: var(--app-color-fg-muted);
+  font-size: 0.875rem;
+}
+
+.app-footer-brand {
+  font-family: var(--app-font-display);
+  color: var(--app-color-fg-muted);
+  text-decoration: none;
+}
+
+.app-footer-links {
+  display: flex;
+  gap: var(--app-space);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-footer-links a {
+  color: var(--app-color-fg-muted);
+  text-decoration: none;
+}
+
+.app-footer-links a:hover {
+  color: var(--app-color-accent);
+}
+
+/* --- Print ------------------------------------------------------------ */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
+  /* Show URLs after links in print. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+  }
+}

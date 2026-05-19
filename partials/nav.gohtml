@@ -1,0 +1,31 @@
+{{- /*
+  infodancer/ui — nav partial (Go html/template variant)
+
+  Expects a ui.NavData (or a struct with the same shape):
+    BrandText  string
+    BrandURL   string         // defaults to "/" if empty
+    Links      []NavLink      // each {Label, URL}
+    User       *NavUser       // nil = anonymous
+    SignInURL  string         // defaults to "/login" if empty
+
+  Render via: {{ template "ui/nav" .Nav }}
+*/ -}}
+{{ define "ui/nav" -}}
+<nav class="app-nav" aria-label="Site">
+  <a class="app-nav-brand" href="{{ if .BrandURL }}{{ .BrandURL }}{{ else }}/{{ end }}">{{ .BrandText }}</a>
+  {{- with .Links }}
+  <ul class="app-nav-links" role="list">
+    {{- range . }}
+    <li><a href="{{ .URL }}">{{ .Label }}</a></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  <div class="app-nav-auth">
+    {{- if .User }}
+    <span class="app-nav-user">{{ .User.DisplayName }}</span>
+    {{- else }}
+    <a href="{{ if .SignInURL }}{{ .SignInURL }}{{ else }}/login{{ end }}">Sign in</a>
+    {{- end }}
+  </div>
+</nav>
+{{- end }}

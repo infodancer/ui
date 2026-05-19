@@ -1,0 +1,34 @@
+{{- /*
+  infodancer/ui — nav partial (Hugo variant)
+
+  Reads from Hugo site config:
+    .Site.Params.ui.brand_text     — brand mark text
+    .Site.Params.ui.brand_url      — brand mark href (defaults to "/")
+    .Site.Menus.main               — primary nav links
+    .Site.Params.user              — optional logged-in user info
+    .Site.Params.ui.sign_in_url    — sign-in path (defaults to "/login")
+
+  Consumers may pass a custom dot context; the partial degrades gracefully
+  when fields are missing.
+*/ -}}
+{{- $brand := .Site.Params.ui.brand_text | default .Site.Title -}}
+{{- $brandURL := .Site.Params.ui.brand_url | default "/" -}}
+{{- $signIn := .Site.Params.ui.sign_in_url | default "/login" -}}
+{{- $user := .Site.Params.user -}}
+<nav class="app-nav" aria-label="Site">
+  <a class="app-nav-brand" href="{{ $brandURL }}">{{ $brand }}</a>
+  {{- with .Site.Menus.main }}
+  <ul class="app-nav-links" role="list">
+    {{- range . }}
+    <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  <div class="app-nav-auth">
+    {{- if $user }}
+    <span class="app-nav-user">{{ $user.display_name | default $user.email }}</span>
+    {{- else }}
+    <a href="{{ $signIn }}">Sign in</a>
+    {{- end }}
+  </div>
+</nav>
