@@ -227,8 +227,6 @@ type NavLink struct {
 
 type NavUser struct {
     DisplayName string
-    MenuURL     string  // typically /account or /profile
-    SignOutURL  string
 }
 ```
 
