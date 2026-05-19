@@ -4,6 +4,7 @@
 # README.md and exposed via the root Go package's embed.FS.
 
 [module]
+  path = "github.com/infodancer/ui"
   [module.hugoVersion]
     extended = false
     min = "0.110.0"

@@ -34,6 +34,7 @@ The package is deliberately small. v0.1 ships **design tokens** (CSS custom prop
 
 - A component library targeted at unrelated downstream users. `infodancer/ui` serves *this portfolio*, not the OSS public at large. It's released under Apache-2.0 and discoverable, but the design choices are tuned for the consumers we actually have.
 - A build pipeline. CSS ships as-is; no preprocessor, no PostCSS, no bundling.
+- Internationalization. The handful of literal strings the partials emit (currently just `"Sign in"`) are English-only. Consumers needing translations fork the partials; we don't ship an i18n surface or a string catalog.
 
 ## The two-consumer model
 

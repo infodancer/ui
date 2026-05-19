@@ -5,8 +5,8 @@ This is a personal-portfolio utility, not a general-purpose OSS framework. PRs a
 ## Local development
 
 ```bash
-task check    # vet + fmt + lint (when implementation lands)
-task test     # tests
+task check    # gofmt + vet + lint + vulncheck
+task test     # go test -race ./...
 ```
 
 CSS files are hand-written. There's no build pipeline; what's in `assets/css/` is what ships.
