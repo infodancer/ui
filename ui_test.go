@@ -26,7 +26,7 @@ func TestAssetsFS_HasCSSFiles(t *testing.T) {
 }
 
 // TestTokensCSS_HasAllDocumentedTokens guards against silent drift between
-// DESIGN.md's documented 27-token vocabulary and the actual tokens.css.
+// DESIGN.md's documented token vocabulary and the actual tokens.css.
 // If you add or rename a token, update both files and this list.
 func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 	t.Parallel()
@@ -37,20 +37,20 @@ func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 	src := string(b)
 
 	tokens := []string{
-		// Colors (11)
+		// Colors
 		"--app-color-bg", "--app-color-fg", "--app-color-bg-raised",
 		"--app-color-fg-muted", "--app-color-border", "--app-color-accent",
 		"--app-color-accent-hover", "--app-color-accent-on",
 		"--app-color-prose-fg", "--app-color-danger", "--app-color-success",
-		// Typography (6)
+		// Typography
 		"--app-font-body", "--app-font-display", "--app-font-mono",
 		"--app-font-size-base", "--app-line-height-body", "--app-line-height-display",
-		// Spacing (5)
+		// Spacing
 		"--app-space-xs", "--app-space-sm", "--app-space",
 		"--app-space-lg", "--app-space-xl",
-		// Radii (3)
+		// Radii
 		"--app-radius-sm", "--app-radius", "--app-radius-pill",
-		// Layout (2)
+		// Layout
 		"--app-max-width-prose", "--app-max-width-page",
 	}
 	for _, tok := range tokens {

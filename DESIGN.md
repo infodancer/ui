@@ -83,7 +83,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 
 ### The list
 
-**Colors (11).** Designed to cover what every consumer site needs without forcing a full palette dictionary up front. More can be added without breaking; renames break every consumer.
+**Colors.** Designed to cover what every consumer site needs without forcing a full palette dictionary up front. More can be added without breaking; renames break every consumer.
 
 | Token | Role |
 |---|---|
@@ -99,7 +99,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 | `--app-color-danger` | Errors, destructive actions, validation failures |
 | `--app-color-success` | Confirmations, success states |
 
-**Typography (6).** Three font stacks, three sizing/spacing primitives. Most consumer sites override the stacks; the line-height defaults are intentional and rarely overridden.
+**Typography.** Three font stacks, three sizing/spacing primitives. Most consumer sites override the stacks; the line-height defaults are intentional and rarely overridden.
 
 | Token | Role |
 |---|---|
@@ -110,7 +110,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 | `--app-line-height-body` | Body / prose line height |
 | `--app-line-height-display` | Heading / display line height |
 
-**Spacing (5).** A small scale, doubling at each step. Token names use t-shirt sizes rather than numeric scales because numeric scales create ambiguity about *what number* is the default.
+**Spacing.** A small scale, doubling at each step. Token names use t-shirt sizes rather than numeric scales because numeric scales create ambiguity about *what number* is the default.
 
 | Token | Default |
 |---|---|
@@ -120,7 +120,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 | `--app-space-lg` | 32px |
 | `--app-space-xl` | 64px |
 
-**Radii (3).**
+**Radii.**
 
 | Token | Role |
 |---|---|
@@ -128,7 +128,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 | `--app-radius` | Default radius (cards, buttons) |
 | `--app-radius-pill` | Full-pill / capsule shapes |
 
-**Layout (2).** Container width primitives. No grid system.
+**Layout.** Container width primitives. No grid system.
 
 | Token | Role |
 |---|---|
@@ -137,12 +137,12 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 
 ### Token vocabulary rationale
 
-The list is short — 27 tokens — because tokens are the *contract* with every consumer. Every name is a public API: renaming or removing one is a breaking change that propagates to every site and every feature module on the next CSS bump. So we keep the list tight, role-named (not value-named — never `--app-blue`), and prefer to add new tokens later from observed need rather than to ship a maximalist vocabulary that mostly goes unused.
+The list is deliberately tight because tokens are the *contract* with every consumer. Every name is a public API: renaming or removing one is a breaking change that propagates to every site and every feature module on the next CSS bump. So we keep the list small, role-named (not value-named — never `--app-blue`), and prefer to add new tokens later from observed need rather than to ship a maximalist vocabulary that mostly goes unused.
 
 Tokens *not* in v0.1 that have been considered and deferred:
 
 - **Shadow scale** (`--app-shadow-sm`, `--app-shadow`, `--app-shadow-lg`). Shadows are highly design-specific; defer until two consumers want the same shadow language.
-- **Color palette beyond the 10** (e.g., named hues like `--app-color-info`, `--app-color-warning`). The 10 cover roles; explicit named hues are component-specific and live in components.
+- **Color palette beyond the role tokens** (e.g., named hues like `--app-color-info`, `--app-color-warning`). The role tokens already cover the slots a layout cares about; explicit named hues are component-specific and live in components.
 - **Z-index scale**. Z-index needs are local to each component; a global scale invites layering bugs.
 - **Animation timing tokens** (`--app-duration-fast`, etc.). Defer until a consumer needs them.
 - **Breakpoint tokens.** Media queries don't read CSS custom properties cleanly; use the same numeric breakpoints across consumers by convention until that proves wrong.

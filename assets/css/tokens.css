@@ -1,7 +1,7 @@
 /*
  * infodancer/ui — design tokens
  *
- * 27 CSS custom properties under the --app-* prefix.
+ * CSS custom properties under the --app-* prefix.
  * Names are the public API; values are defaults. Consumer sites override
  * by loading a stylesheet after tokens.css that redeclares :root selectors.
  *
@@ -12,7 +12,7 @@
  */
 
 :root {
-  /* Color — 11 tokens */
+  /* Color */
   --app-color-bg:           #fafafa;
   --app-color-fg:           #1a1a1a;
   --app-color-bg-raised:    #ffffff;
@@ -25,7 +25,7 @@
   --app-color-danger:       #b3261e;
   --app-color-success:      #1d7a3d;
 
-  /* Typography — 6 tokens */
+  /* Typography */
   --app-font-body:           system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-display:        system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-mono:           ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -33,19 +33,19 @@
   --app-line-height-body:    1.6;
   --app-line-height-display: 1.2;
 
-  /* Spacing — 5 tokens, doubling scale */
+  /* Spacing — doubling scale */
   --app-space-xs: 4px;
   --app-space-sm: 8px;
   --app-space:    16px;
   --app-space-lg: 32px;
   --app-space-xl: 64px;
 
-  /* Radii — 3 tokens */
+  /* Radii */
   --app-radius-sm:   2px;
   --app-radius:      6px;
   --app-radius-pill: 9999px;
 
-  /* Layout — 2 tokens */
+  /* Layout */
   --app-max-width-prose: 65ch;
   --app-max-width-page:  80rem;
 }

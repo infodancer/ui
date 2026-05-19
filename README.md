@@ -10,7 +10,7 @@ Shared design tokens, base CSS, and `nav` / `footer` partials for the [infodance
 
 A small CSS + template library:
 
-- **Design tokens** — 26 CSS custom properties under the `--app-*` prefix covering color, typography, spacing, radii, and layout primitives. Tokens are the public API; everything else is implementation detail.
+- **Design tokens** — CSS custom properties under the `--app-*` prefix covering color, typography, spacing, radii, and layout primitives. Tokens are the public API; everything else is implementation detail.
 - **Base stylesheet** — a minimal reset plus sensible defaults for typography, lists, links, code, basic form elements. ~150 lines.
 - **`nav` and `footer` partials** — top nav strip and footer, shipped in **parallel Hugo and Go variants** producing identical output but each idiomatic to its host engine.
 
