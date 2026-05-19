@@ -1,7 +1,7 @@
 /*
  * infodancer/ui — design tokens
  *
- * 26 CSS custom properties under the --app-* prefix.
+ * 27 CSS custom properties under the --app-* prefix.
  * Names are the public API; values are defaults. Consumer sites override
  * by loading a stylesheet after tokens.css that redeclares :root selectors.
  *
@@ -12,7 +12,7 @@
  */
 
 :root {
-  /* Color — 10 tokens */
+  /* Color — 11 tokens */
   --app-color-bg:           #fafafa;
   --app-color-fg:           #1a1a1a;
   --app-color-bg-raised:    #ffffff;
@@ -20,6 +20,7 @@
   --app-color-border:       rgba(0, 0, 0, 0.12);
   --app-color-accent:       #0b5394;
   --app-color-accent-hover: #1a73b9;
+  --app-color-accent-on:    #ffffff;
   --app-color-prose-fg:     #1a1a1a;
   --app-color-danger:       #b3261e;
   --app-color-success:      #1d7a3d;

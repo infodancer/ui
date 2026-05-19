@@ -26,7 +26,7 @@ func TestAssetsFS_HasCSSFiles(t *testing.T) {
 }
 
 // TestTokensCSS_HasAllDocumentedTokens guards against silent drift between
-// DESIGN.md's documented 26-token vocabulary and the actual tokens.css.
+// DESIGN.md's documented 27-token vocabulary and the actual tokens.css.
 // If you add or rename a token, update both files and this list.
 func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 	t.Parallel()
@@ -37,11 +37,11 @@ func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 	src := string(b)
 
 	tokens := []string{
-		// Colors (10)
+		// Colors (11)
 		"--app-color-bg", "--app-color-fg", "--app-color-bg-raised",
 		"--app-color-fg-muted", "--app-color-border", "--app-color-accent",
-		"--app-color-accent-hover", "--app-color-prose-fg",
-		"--app-color-danger", "--app-color-success",
+		"--app-color-accent-hover", "--app-color-accent-on",
+		"--app-color-prose-fg", "--app-color-danger", "--app-color-success",
 		// Typography (6)
 		"--app-font-body", "--app-font-display", "--app-font-mono",
 		"--app-font-size-base", "--app-line-height-body", "--app-line-height-display",
@@ -59,6 +59,51 @@ func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 		// --app-space-xs).
 		if !strings.Contains(src, tok+":") {
 			t.Errorf("tokens.css missing %q declaration", tok)
+		}
+	}
+}
+
+// TestBaseCSS_HasAllUtilityClasses guards against silent drift between
+// DESIGN.md's documented utility-class roster and base.css. If you add
+// or rename a utility class, update both.
+func TestBaseCSS_HasAllUtilityClasses(t *testing.T) {
+	t.Parallel()
+	b, err := fs.ReadFile(ui.AssetsFS(), "css/base.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := string(b)
+
+	classes := []string{
+		// Layout + prose helpers
+		".app-container", ".app-prose",
+		// Status text colors
+		".app-danger", ".app-success",
+		// Chrome
+		".app-nav", ".app-nav-brand", ".app-nav-links",
+		".app-footer", ".app-footer-brand", ".app-footer-links",
+		// List chrome
+		".app-list-header", ".app-list-sorts", ".app-list-empty",
+		// Sort link
+		".app-sort",
+		// Tag chips
+		".app-tag-list", ".app-tag", ".app-tag-count",
+		// Search
+		".app-search-form", ".app-search-empty",
+		// Pager
+		".app-pager", ".app-pager-pos",
+		// Badge
+		".app-badge",
+		// Card primitives
+		".app-card", ".app-card-grid",
+		// Comments
+		".app-comment-list", ".app-comment",
+		// Accessibility
+		".app-visually-hidden",
+	}
+	for _, cls := range classes {
+		if !strings.Contains(src, cls) {
+			t.Errorf("base.css missing %q declaration", cls)
 		}
 	}
 }

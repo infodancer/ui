@@ -24,7 +24,7 @@ The package is deliberately small. v0.1 ships **design tokens** (CSS custom prop
 
 ### v0.1 explicitly excludes
 
-- Component primitives beyond nav/footer (cards, buttons, forms-as-system, badges, etc.). Those live inside feature modules until duplication forces extraction.
+- Cards, buttons-as-system, forms-as-design-system, full color components. Those live inside feature modules until duplication forces extraction. (The small set of recurring utility patterns extracted in v0.1 — badge base, comments, list chrome, sort tabs, tag chips, pager, search row, visually-hidden — *are* in `base.css`; see "Base stylesheet" below.)
 - Dark mode. Tokens are designed so a dark variant is *trivial to add later* by overriding `:root` in a `@media (prefers-color-scheme: dark)` block, but v0.1 ships a single light palette by default and lets each consumer supply dark overrides if they want them.
 - JavaScript. `infodancer/ui` is HTML + CSS. Interactivity is the consumer's problem (htmx, vanilla JS, whatever).
 - Iconography. Consumers ship their own icons; the partials use plain text marks where applicable.
@@ -83,7 +83,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 
 ### The list
 
-**Colors (10).** Designed to cover what every consumer site needs without forcing a full palette dictionary up front. More can be added without breaking; renames break every consumer.
+**Colors (11).** Designed to cover what every consumer site needs without forcing a full palette dictionary up front. More can be added without breaking; renames break every consumer.
 
 | Token | Role |
 |---|---|
@@ -94,6 +94,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 | `--app-color-border` | Separators, hairlines, input borders |
 | `--app-color-accent` | Primary action color: links, primary button background |
 | `--app-color-accent-hover` | Hover state for accent |
+| `--app-color-accent-on` | Foreground color when painted onto an accent fill (e.g. text on an active sort tab, label on a primary button) |
 | `--app-color-prose-fg` | Long-form reading text. Often equals `--app-color-fg`; given its own token so consumers with a dedicated reading mode can tune separately. |
 | `--app-color-danger` | Errors, destructive actions, validation failures |
 | `--app-color-success` | Confirmations, success states |
@@ -136,7 +137,7 @@ With `infodancer/ui` loaded on the page, `--app-color-fg` resolves and the faq s
 
 ### Token vocabulary rationale
 
-The list is short — 26 tokens — because tokens are the *contract* with every consumer. Every name is a public API: renaming or removing one is a breaking change that propagates to every site and every feature module on the next CSS bump. So we keep the list tight, role-named (not value-named — never `--app-blue`), and prefer to add new tokens later from observed need rather than to ship a maximalist vocabulary that mostly goes unused.
+The list is short — 27 tokens — because tokens are the *contract* with every consumer. Every name is a public API: renaming or removing one is a breaking change that propagates to every site and every feature module on the next CSS bump. So we keep the list tight, role-named (not value-named — never `--app-blue`), and prefer to add new tokens later from observed need rather than to ship a maximalist vocabulary that mostly goes unused.
 
 Tokens *not* in v0.1 that have been considered and deferred:
 
@@ -163,7 +164,24 @@ Tokens *not* in v0.1 that have been considered and deferred:
 
 `base.css` *also* owns the nav/footer CSS (under `.app-nav` and `.app-footer` selectors). The partials carry markup only; styles live alongside the rest of the base sheet so consumers load exactly two files (`tokens.css` + `base.css`) plus their own overrides. Standard CSS cascade order handles consumer overrides cleanly when site CSS loads after `base.css`.
 
-`base.css` does **not** apply opinionated typography scale ratios beyond what `--app-space-*` already provides, and does not own component classes for cards / buttons / badges (those live in feature modules until duplication forces extraction).
+`base.css` ships a small set of **utility class patterns** that recur across feature modules. They live here once instead of being re-implemented per module. Each is opinionated only at the chrome level — colors, spacing, borders — and inherits all token values so consumer overrides flow through:
+
+| Class | Pattern |
+|---|---|
+| `.app-list-header`, `.app-list-sorts`, `.app-list-empty` | Header strip + sort-tab row + empty state for a list page |
+| `.app-sort`, `.app-sort.is-active` | Clickable sort/filter tab; active state paints with `--app-color-accent` + `--app-color-accent-on` |
+| `.app-tag-list`, `.app-tag`, `.app-tag-count` | Inline horizontal chip list, single chip, count modifier |
+| `.app-search-form`, `.app-search-empty` | Search input row + zero-results message |
+| `.app-pager`, `.app-pager-pos` | Pagination row + position indicator |
+| `.app-badge` | Inline status pill, base styling only — semantic variants belong to feature modules |
+| `.app-card` | Raised surface — padding, bg-raised, border, radius. Composes with module classes (`.app-card faq-q-card`) for layout. |
+| `.app-card-grid` | Responsive auto-fill grid of cards (12rem minmax columns, sm gap) |
+| `.app-comment-list`, `.app-comment` | Muted secondary thread under a primary item |
+| `.app-visually-hidden` | Standard a11y screen-reader-only helper |
+
+These were extracted after observing the same patterns in faq (and they're identical to what blog and timeline will need). Feature modules use the class names directly; they don't need to re-declare the visual treatment.
+
+`base.css` does **not** apply opinionated typography scale ratios beyond what `--app-space-*` already provides, and does not own component classes for cards or buttons-as-system (those live in feature modules until duplication forces extraction).
 
 ## Partial shapes
 

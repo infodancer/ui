@@ -322,6 +322,178 @@ button[disabled] {
   color: var(--app-color-accent);
 }
 
+/* --- List chrome ------------------------------------------------------ */
+/* Generic list-page header + sort bar + empty state. Used by any page    */
+/* that renders a list of items with optional sort tabs.                  */
+
+.app-list-header {
+  margin-block-end: var(--app-space);
+}
+
+.app-list-sorts {
+  display: flex;
+  gap: var(--app-space-sm);
+  margin-block-start: var(--app-space-sm);
+}
+
+.app-list-empty {
+  padding: var(--app-space);
+  color: var(--app-color-fg-muted);
+  font-style: italic;
+}
+
+/* --- Sort link -------------------------------------------------------- */
+
+.app-sort {
+  padding: var(--app-space-xs) var(--app-space-sm);
+  border-radius: var(--app-radius);
+  text-decoration: none;
+}
+
+.app-sort.is-active {
+  background-color: var(--app-color-accent);
+  color: var(--app-color-accent-on);
+}
+
+.app-sort.is-active:hover,
+.app-sort.is-active:focus {
+  color: var(--app-color-accent-on);
+  text-decoration: none;
+}
+
+/* --- Tag chips -------------------------------------------------------- */
+/* .app-tag-list is an inline horizontal chip list (wraps). .app-tag is   */
+/* the chip itself; .app-tag-count is a small count badge inline with it. */
+
+.app-tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-sm);
+}
+
+.app-tag {
+  display: inline-block;
+  padding: 0 var(--app-space-sm);
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius);
+  font-size: 0.8rem;
+  color: var(--app-color-fg);
+  text-decoration: none;
+}
+
+.app-tag:hover {
+  color: var(--app-color-accent);
+}
+
+.app-tag-count {
+  margin-inline-start: var(--app-space-sm);
+  color: var(--app-color-fg-muted);
+  font-size: 0.85rem;
+}
+
+/* --- Search form ------------------------------------------------------ */
+
+.app-search-form {
+  display: flex;
+  gap: var(--app-space-sm);
+  margin-block-start: var(--app-space-sm);
+}
+
+.app-search-form input[type="search"] {
+  flex: 1;
+}
+
+.app-search-empty {
+  padding: var(--app-space);
+  color: var(--app-color-fg-muted);
+  font-style: italic;
+}
+
+/* --- Pager ------------------------------------------------------------ */
+
+.app-pager {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+  margin-block-start: var(--app-space);
+}
+
+.app-pager-pos {
+  color: var(--app-color-fg-muted);
+}
+
+/* --- Badge ------------------------------------------------------------ */
+/* Base badge styling. Color variants belong to consuming modules — they  */
+/* know which semantic states they care about (e.g. archived/accepted in  */
+/* faq, draft/published in blog).                                         */
+
+.app-badge {
+  display: inline-block;
+  margin-inline-start: var(--app-space-sm);
+  padding: 0 var(--app-space-sm);
+  font-size: 0.75rem;
+  border-radius: var(--app-radius);
+  background-color: var(--app-color-bg-raised);
+  color: var(--app-color-fg-muted);
+}
+
+/* --- Card primitives -------------------------------------------------- */
+/* .app-card is a single surface that sits raised on the page. .app-card- */
+/* grid is a responsive auto-fill grid of cards. Feature modules compose: */
+/*   <ul class="app-card-grid"><li class="app-card">...</li>...</ul>      */
+/*   <article class="app-card faq-q-card">...</article>                   */
+/* — .app-card supplies the chrome, the per-module class adds layout.     */
+
+.app-card {
+  padding: var(--app-space);
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius);
+}
+
+.app-card-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--app-space-sm);
+}
+
+/* --- Comments --------------------------------------------------------- */
+/* A muted inline secondary thread. Used under questions/answers, posts.  */
+
+.app-comment-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--app-space-sm) 0 0;
+  font-size: 0.85rem;
+  color: var(--app-color-fg-muted);
+}
+
+.app-comment {
+  padding: var(--app-space-xs) 0;
+  border-block-start: 1px solid var(--app-color-border);
+}
+
+/* --- Accessibility ---------------------------------------------------- */
+
+.app-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* --- Print ------------------------------------------------------------ */
 
 @media print {
