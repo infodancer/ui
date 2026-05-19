@@ -238,11 +238,11 @@ Both variants emit the same HTML structure with class names prefixed `app-nav-*`
 
 A small footer strip. Both variants render:
 
-- A small brand mark
+- A small brand mark (linked, with consumer-supplied URL — defaults to `/`)
 - Copyright / credit text
 - Optional secondary links (e.g., privacy, contact)
 
-The Hugo and Go data shapes mirror `nav` in spirit, smaller in scope.
+The Hugo and Go data shapes mirror `nav` in spirit, smaller in scope. Hugo reads `brand_url` from `.Site.Params.ui`; Go reads `BrandURL` from `FooterData`. Both default the link target to `/` when the value is empty.
 
 ## Integration: Hugo consumer quickstart
 

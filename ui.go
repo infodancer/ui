@@ -85,6 +85,7 @@ type NavUser struct {
 // Any struct with the same fields works.
 type FooterData struct {
 	BrandText string
+	BrandURL  string // defaults to "/" when empty
 	Copyright string // free-form; consumer formats (e.g. "© 2026 Example.org")
 	Links     []FooterLink
 }

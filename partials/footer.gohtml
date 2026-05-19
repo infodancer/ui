@@ -3,6 +3,7 @@
 
   Expects a ui.FooterData (or a struct with the same shape):
     BrandText  string
+    BrandURL   string         // defaults to "/" if empty
     Copyright  string         // free-form; consumer formats
     Links      []FooterLink   // each {Label, URL}
 
@@ -10,7 +11,7 @@
 */ -}}
 {{ define "ui/footer" -}}
 <footer class="app-footer">
-  <a class="app-footer-brand" href="/">{{ .BrandText }}</a>
+  <a class="app-footer-brand" href="{{ if .BrandURL }}{{ .BrandURL }}{{ else }}/{{ end }}">{{ .BrandText }}</a>
   <span class="app-footer-copyright">{{ .Copyright }}</span>
   {{- with .Links }}
   <ul class="app-footer-links" role="list">

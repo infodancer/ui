@@ -3,6 +3,7 @@
 
   Reads from Hugo site config:
     .Site.Params.ui.brand_text     — brand mark text
+    .Site.Params.ui.brand_url      — brand mark href (defaults to "/")
     .Site.Params.ui.copyright      — copyright / credit line
     .Site.Menus.footer             — optional footer links
 
@@ -10,9 +11,10 @@
   missing.
 */ -}}
 {{- $brand := .Site.Params.ui.brand_text | default .Site.Title -}}
+{{- $brandURL := .Site.Params.ui.brand_url | default "/" -}}
 {{- $copyright := .Site.Params.ui.copyright | default (printf "© %d %s" now.Year $brand) -}}
 <footer class="app-footer">
-  <a class="app-footer-brand" href="/">{{ $brand }}</a>
+  <a class="app-footer-brand" href="{{ $brandURL }}">{{ $brand }}</a>
   <span class="app-footer-copyright">{{ $copyright }}</span>
   {{- with .Site.Menus.footer }}
   <ul class="app-footer-links" role="list">

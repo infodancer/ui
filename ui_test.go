@@ -225,6 +225,30 @@ func TestFooter_RendersWithLinks(t *testing.T) {
 			t.Errorf("footer output missing %q\noutput:\n%s", want, out)
 		}
 	}
+	// BrandURL empty must default to "/".
+	if !strings.Contains(out, `class="app-footer-brand" href="/"`) {
+		t.Errorf("footer should default BrandURL to /\noutput:\n%s", out)
+	}
+}
+
+func TestFooter_HonorsExplicitBrandURL(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := ui.FooterData{
+		BrandText: "Example",
+		BrandURL:  "/home",
+	}
+	var buf bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&buf, "ui/footer", data); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, `class="app-footer-brand" href="/home"`) {
+		t.Errorf("footer should honor explicit BrandURL\noutput:\n%s", out)
+	}
 }
 
 // TestRealisticConsumerIntegration exercises the consumption pattern that
