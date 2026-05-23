@@ -1,51 +1,109 @@
 /*
  * infodancer/ui — design tokens
  *
- * CSS custom properties under the --app-* prefix.
- * Names are the public API; values are defaults. Consumer sites override
- * by loading a stylesheet after tokens.css that redeclares :root selectors.
+ * CSS custom properties under the --app-* prefix. The NAMES are the public
+ * API (renaming one breaks every consumer); the VALUES are defaults that a
+ * consumer site overrides by loading a stylesheet after this one.
  *
- * Feature modules consume by chaining:
+ * Values are sourced from Open Props (assets/css/open-props.css, pinned),
+ * so the scales — color ramps, spacing, radii, shadows — are coherent and
+ * battle-tested rather than hand-picked one constant at a time. Open Props
+ * defines hundreds of low-level vars (--gray-*, --size-*, --radius-*, …);
+ * we expose only the small --app-* role vocabulary on top of it. Consumers
+ * (and feature modules) bind to --app-*, never to the Open Props vars
+ * directly, so the Open Props version can move under us without churn.
+ *
+ * LOAD ORDER (required): open-props.css → tokens.css → base.css → site.css
+ * tokens.css references Open Props vars, so open-props.css must load first.
+ *
+ * Feature modules chain through with their own fallbacks:
  *   --faq-color-fg: var(--app-color-fg, #1a1a1a);
  *
  * See DESIGN.md for the rationale on what's included and what's deferred.
  */
 
 :root {
-  /* Color */
-  --app-color-bg:           #fafafa;
-  --app-color-fg:           #1a1a1a;
+  /* Color — light theme defaults */
+  --app-color-bg:           var(--gray-0);
+  --app-color-fg:           var(--gray-9);
   --app-color-bg-raised:    #ffffff;
-  --app-color-fg-muted:     #5a5a5a;
-  --app-color-border:       rgba(0, 0, 0, 0.12);
-  --app-color-accent:       #0b5394;
-  --app-color-accent-hover: #1a73b9;
+  --app-color-fg-muted:     var(--gray-7);
+  --app-color-border:       var(--gray-3);
+  --app-color-accent:       var(--blue-8);
+  --app-color-accent-hover: var(--blue-7);
   --app-color-accent-on:    #ffffff;
-  --app-color-prose-fg:     #1a1a1a;
-  --app-color-danger:       #b3261e;
-  --app-color-success:      #1d7a3d;
+  --app-color-prose-fg:     var(--gray-9);
+  --app-color-danger:       var(--red-7);
+  --app-color-success:      var(--green-9);
 
   /* Typography */
-  --app-font-body:           system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --app-font-display:        system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --app-font-mono:           ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --app-font-body:           var(--font-sans);
+  --app-font-display:        var(--font-sans);
+  --app-font-mono:           var(--font-mono);
   --app-font-size-base:      16px;
   --app-line-height-body:    1.6;
-  --app-line-height-display: 1.2;
+  --app-line-height-display: var(--font-lineheight-1); /* 1.25 */
 
-  /* Spacing — doubling scale */
-  --app-space-xs: 4px;
-  --app-space-sm: 8px;
-  --app-space:    16px;
-  --app-space-lg: 32px;
-  --app-space-xl: 64px;
+  /* Spacing — doubling scale, bound to Open Props sizes */
+  --app-space-xs: var(--size-1); /* .25rem / 4px  */
+  --app-space-sm: var(--size-2); /* .5rem  / 8px  */
+  --app-space:    var(--size-3); /* 1rem   / 16px */
+  --app-space-lg: var(--size-7); /* 2rem   / 32px */
+  --app-space-xl: var(--size-9); /* 4rem   / 64px */
 
   /* Radii */
-  --app-radius-sm:   2px;
-  --app-radius:      6px;
-  --app-radius-pill: 9999px;
+  --app-radius-sm:   var(--radius-1);     /* 2px  */
+  --app-radius:      var(--radius-2);     /* 5px  */
+  --app-radius-pill: var(--radius-round); /* pill */
+
+  /* Elevation — added in v0.2 now that a second consumer (osg) needs raised
+     surfaces. Bound to Open Props shadows, which resolve against
+     --shadow-color / --shadow-strength (both defined in open-props.css). */
+  --app-shadow:    var(--shadow-2);
+  --app-shadow-lg: var(--shadow-3);
 
   /* Layout */
-  --app-max-width-prose: 65ch;
+  --app-max-width-prose: var(--size-content-3); /* ~60ch */
   --app-max-width-page:  80rem;
+}
+
+/*
+ * Dark theme.
+ *
+ * Resolution order, highest priority first:
+ *   1. An explicit theme on the root element wins: <html data-theme="dark">
+ *      or data-theme="light". Lets a site default to dark (osg) or expose a
+ *      user toggle without fighting the OS setting.
+ *   2. Otherwise the OS preference applies (prefers-color-scheme: dark),
+ *      unless the site has forced light via data-theme="light".
+ *   3. Otherwise the light defaults above.
+ */
+:root[data-theme="dark"] {
+  --app-color-bg:           var(--gray-10);
+  --app-color-fg:           var(--gray-1);
+  --app-color-bg-raised:    var(--gray-9);
+  --app-color-fg-muted:     var(--gray-5);
+  --app-color-border:       var(--gray-8);
+  --app-color-accent:       var(--blue-5);
+  --app-color-accent-hover: var(--blue-4);
+  --app-color-accent-on:    var(--gray-12);
+  --app-color-prose-fg:     var(--gray-1);
+  --app-color-danger:       var(--red-5);
+  --app-color-success:      var(--green-5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --app-color-bg:           var(--gray-10);
+    --app-color-fg:           var(--gray-1);
+    --app-color-bg-raised:    var(--gray-9);
+    --app-color-fg-muted:     var(--gray-5);
+    --app-color-border:       var(--gray-8);
+    --app-color-accent:       var(--blue-5);
+    --app-color-accent-hover: var(--blue-4);
+    --app-color-accent-on:    var(--gray-12);
+    --app-color-prose-fg:     var(--gray-1);
+    --app-color-danger:       var(--red-5);
+    --app-color-success:      var(--green-5);
+  }
 }
