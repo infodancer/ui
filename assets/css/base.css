@@ -616,6 +616,162 @@ button[disabled] {
   margin-block-start: var(--app-space-lg);
 }
 
+/* --- Sidebar layout --------------------------------------------------- */
+/* A content column flanked by an optional left and/or right aside. The     */
+/* consumer chooses both, either, or neither: add .has-left / .has-right to  */
+/* .app-sidebar-layout for each aside present (neither => full-width        */
+/* content). Source order is left aside, main, right aside. Asides are       */
+/* --app-sidebar-width wide; the column collapses to a single stack on       */
+/* narrow viewports. */
+
+.app-sidebar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--app-space-xl);
+  align-items: start;
+}
+
+.app-sidebar-layout.has-left {
+  grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
+}
+
+.app-sidebar-layout.has-right {
+  grid-template-columns: minmax(0, 1fr) var(--app-sidebar-width);
+}
+
+.app-sidebar-layout.has-left.has-right {
+  grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr) var(--app-sidebar-width);
+}
+
+.app-sidebar-main {
+  min-width: 0; /* let the content column shrink instead of overflowing */
+}
+
+@media (max-width: 56rem) {
+  .app-sidebar-layout,
+  .app-sidebar-layout.has-left,
+  .app-sidebar-layout.has-right,
+  .app-sidebar-layout.has-left.has-right {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--app-space-lg);
+  }
+}
+
+/* --- Sidebar panel ---------------------------------------------------- */
+/* The aside itself: a quiet bordered panel of collapsible link sections.   */
+/* Clean default — consumers re-skin via token overrides and, if they want, */
+/* by targeting .app-sidebar-left / .app-sidebar-right. */
+
+.app-sidebar {
+  padding: var(--app-space);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius);
+  background-color: var(--app-color-bg-raised);
+}
+
+/* Each section is a native <details> so collapse/expand needs no JS; a      */
+/* consumer that wants the open/closed state remembered keys its own script  */
+/* off the data-sidebar-key attribute. */
+.app-sidebar-section {
+  margin-block-start: var(--app-space);
+}
+
+.app-sidebar-section:first-of-type {
+  margin-block-start: 0;
+}
+
+.app-sidebar-section > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+  margin-block-end: var(--app-space-sm);
+  padding-block-end: var(--app-space-xs);
+  border-block-end: 1px solid var(--app-color-border);
+  cursor: pointer;
+  list-style: none; /* drop the default disclosure triangle */
+}
+
+.app-sidebar-section > summary::-webkit-details-marker {
+  display: none; /* Safari/old WebKit triangle */
+}
+
+/* The section heading carries the type; summary is the flex container. */
+.app-sidebar-section > summary > * {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Chevron: down (collapsed) -> up (open). */
+.app-sidebar-section > summary::after {
+  content: "";
+  inline-size: 0.45rem;
+  block-size: 0.45rem;
+  margin-inline-start: auto;
+  border-right: 2px solid var(--app-color-fg-muted);
+  border-bottom: 2px solid var(--app-color-fg-muted);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.app-sidebar-section[open] > summary::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+
+.app-sidebar-section > summary:focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 2px;
+}
+
+/* Feed: a list of links, each with an optional muted meta line, separated  */
+/* by faint rules. */
+.app-sidebar-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-sidebar-feed li {
+  padding-block: var(--app-space-sm);
+  border-block-start: 1px solid var(--app-color-border);
+}
+
+.app-sidebar-feed li:first-child {
+  border-block-start: none;
+  padding-block-start: 0;
+}
+
+.app-sidebar-feed a {
+  display: block;
+  color: var(--app-color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app-sidebar-feed a:hover {
+  text-decoration: underline;
+}
+
+.app-sidebar-meta {
+  display: block;
+  color: var(--app-color-fg-muted);
+  font-size: 0.85rem;
+}
+
+/* Optional count/badge pill (e.g. a taxonomy tally beside a link). */
+.app-sidebar-count {
+  display: inline-block;
+  min-width: 1.4em;
+  padding-inline: var(--app-space-xs);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--app-radius-pill);
+  background-color: var(--app-color-border);
+  color: var(--app-color-fg-muted);
+}
+
 /* --- Print ------------------------------------------------------------ */
 
 @media print {
