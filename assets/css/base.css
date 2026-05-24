@@ -192,7 +192,7 @@ select:focus-visible {
 
 button {
   background-color: var(--app-color-accent);
-  color: var(--app-color-bg-raised);
+  color: var(--app-color-accent-on);
   border: 1px solid var(--app-color-accent);
   border-radius: var(--app-radius);
   padding: var(--app-space-sm) var(--app-space);
@@ -492,6 +492,128 @@ button[disabled] {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* --- Buttons as a class ----------------------------------------------- */
+/* The bare <button> rule above styles form buttons. .app-btn applies the  */
+/* same treatment to anything (notably <a>) so links can be primary/       */
+/* secondary actions without faking a form. Variants stay minimal:         */
+/* primary (filled accent) is the default; .app-btn-secondary is outlined. */
+
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+  padding: var(--app-space-sm) var(--app-space);
+  background-color: var(--app-color-accent);
+  color: var(--app-color-accent-on);
+  border: 1px solid var(--app-color-accent);
+  border-radius: var(--app-radius);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-btn:hover {
+  background-color: var(--app-color-accent-hover);
+  border-color: var(--app-color-accent-hover);
+  color: var(--app-color-accent-on);
+}
+
+.app-btn:focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 2px;
+}
+
+.app-btn-secondary {
+  background-color: transparent;
+  color: var(--app-color-fg);
+  border-color: var(--app-color-border);
+}
+
+.app-btn-secondary:hover {
+  background-color: transparent;
+  color: var(--app-color-accent);
+  border-color: var(--app-color-accent);
+}
+
+/* --- Tabs ------------------------------------------------------------- */
+/* A horizontal row of section tabs sitting on a hairline; the active tab  */
+/* is marked by an accent underline. Markup: a <nav class="app-tabs"> of   */
+/* <a class="app-tab"> with .is-active on the current one.                 */
+
+.app-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-lg);
+  border-block-end: 1px solid var(--app-color-border);
+  margin-block: var(--app-space) var(--app-space);
+}
+
+.app-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+  padding-block-end: var(--app-space-sm);
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px; /* overlap the row's hairline */
+  color: var(--app-color-fg-muted);
+  text-decoration: none;
+}
+
+.app-tab:hover {
+  color: var(--app-color-accent);
+}
+
+.app-tab.is-active {
+  color: var(--app-color-accent);
+  border-block-end-color: var(--app-color-accent);
+  font-weight: 600;
+}
+
+/* --- Panel ------------------------------------------------------------ */
+/* A bordered block that frames a secondary region (a join form, an aside, */
+/* members-only details). Like .app-card but full-width and quieter; the   */
+/* .app-panel-accent modifier tints it with the accent for emphasis.       */
+
+.app-panel {
+  padding: var(--app-space);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius);
+  background-color: var(--app-color-bg-raised);
+}
+
+.app-panel-accent {
+  border-color: var(--app-color-accent);
+  /* color-mix keeps the tint derived from the accent so it tracks the    */
+  /* palette automatically; falls back to the raised surface where        */
+  /* color-mix is unsupported. */
+  background-color: var(--app-color-bg-raised);
+  background-color: color-mix(in srgb, var(--app-color-accent) 8%, var(--app-color-bg-raised));
+}
+
+/* --- Page header ------------------------------------------------------ */
+/* Title block paired with an optional action (edit link, primary button)  */
+/* pushed to the far end. Drop a muted .app-page-meta line under the title. */
+
+.app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space);
+}
+
+.app-page-meta {
+  color: var(--app-color-fg-muted);
+  margin-block-start: var(--app-space-xs);
+}
+
+/* --- Section ---------------------------------------------------------- */
+/* Vertical separation between major page sections without per-call margin */
+/* utilities. */
+
+.app-section {
+  margin-block-start: var(--app-space-lg);
 }
 
 /* --- Print ------------------------------------------------------------ */

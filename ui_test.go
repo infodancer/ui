@@ -50,6 +50,8 @@ func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 		"--app-space-lg", "--app-space-xl",
 		// Radii
 		"--app-radius-sm", "--app-radius", "--app-radius-pill",
+		// Elevation
+		"--app-shadow", "--app-shadow-lg",
 		// Layout
 		"--app-max-width-prose", "--app-max-width-page",
 	}
@@ -98,6 +100,14 @@ func TestBaseCSS_HasAllUtilityClasses(t *testing.T) {
 		".app-card", ".app-card-grid",
 		// Comments
 		".app-comment-list", ".app-comment",
+		// Buttons as a class
+		".app-btn", ".app-btn-secondary",
+		// Tabs
+		".app-tabs", ".app-tab",
+		// Panel
+		".app-panel", ".app-panel-accent",
+		// Page header + section
+		".app-page-header", ".app-page-meta", ".app-section",
 		// Accessibility
 		".app-visually-hidden",
 	}
