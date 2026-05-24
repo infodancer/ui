@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.2.0 — 2026-05-23
+
+First tagged release. The earlier nav/footer partials and `--app-*` token
+scaffolding were the conceptual v0.1; this is the first version a consumer
+(osg) pins to a tag.
+
 ### Added
 - `FooterData.BrandURL` (Go) and `.Site.Params.ui.brand_url` (Hugo) so the footer brand mark can link somewhere other than `/`. Defaults to `/` when empty, matching prior behavior.
 - **Open Props as the value layer.** `assets/css/open-props.css` vendors a pinned copy of [Open Props](https://open-props.style/) v1.7.23 (no CDN at runtime, no npm in the build). `tokens.css` now sources its values from Open Props vars (`--gray-*`, `--size-*`, `--radius-*`, shadows) instead of hand-picked constants. The `--app-*` names are unchanged — consumers and feature modules still bind only to `--app-*`, never to Open Props vars directly. **Load order is now significant:** `open-props.css` → `tokens.css` → `base.css` → site overrides.
