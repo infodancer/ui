@@ -178,6 +178,8 @@ Tokens *not* in v0.1 that have been considered and deferred:
 | `.app-card` | Raised surface — padding, bg-raised, border, radius. Composes with module classes (`.app-card faq-q-card`) for layout. |
 | `.app-card-grid` | Responsive auto-fill grid of cards (12rem minmax columns, sm gap) |
 | `.app-comment-list`, `.app-comment` | Muted secondary thread under a primary item |
+| `.app-sidebar-layout`, `.app-sidebar-main` | Content column flanked by an optional left and/or right aside — add `.has-left` / `.has-right` per aside present (neither = full-width). Asides are `--app-sidebar-width` wide; collapses to a single stack on narrow viewports. |
+| `.app-sidebar`, `.app-sidebar-section`, `.app-sidebar-feed`, `.app-sidebar-meta`, `.app-sidebar-count` | The aside panel: collapsible link sections (native `<details>`), each a feed of links with an optional muted meta line and optional count pill |
 | `.app-visually-hidden` | Standard a11y screen-reader-only helper |
 
 These were extracted after observing the same patterns in faq (and they're identical to what blog and timeline will need). Feature modules use the class names directly; they don't need to re-declare the visual treatment.
@@ -244,6 +246,39 @@ A small footer strip. Both variants render:
 - Optional secondary links (e.g., privacy, contact)
 
 The Hugo and Go data shapes mirror `nav` in spirit, smaller in scope. Hugo reads `brand_url` from `.Site.Params.ui`; Go reads `BrandURL` from `FooterData`. Both default the link target to `/` when the value is empty.
+
+### `sidebar`
+
+One aside panel of collapsible link sections. Each section is a native `<details>`, so collapse/expand is browser-native and needs **no JavaScript** (consistent with the no-JS scope). The partial is *side-unaware*: the page layout decides placement.
+
+**Two-sided layouts.** The `.app-sidebar-layout` grid takes an optional left and/or right aside; the consumer chooses both, either, or neither. The page adds `.has-left` / `.has-right` to the layout for each aside present and wraps each render in an `<aside class="app-sidebar app-sidebar-{left,right}">`, rendering `ui/sidebar` once per side with its own `SidebarData`. Neither modifier → full-width content.
+
+**Go data shape:**
+
+```go
+type SidebarData struct {
+    Sections []SidebarSection
+}
+
+type SidebarSection struct {
+    Key   string // stable id -> data-sidebar-key
+    Title string
+    Open  bool   // default-expanded?
+    Items []SidebarItem
+}
+
+type SidebarItem struct {
+    Label string
+    URL   string
+    Meta  string // optional muted secondary line
+}
+```
+
+**Hugo variant** takes a passed context (sidebar content is usually page-derived, not site config): `{{ partial "sidebar.html" (dict "Sections" $sections) }}`, each section/item a dict with the same fields.
+
+**Persistence.** Each section emits `data-sidebar-key="<Key>"`. Remembering open/closed state across pages is a consumer concern — bind a small script to that attribute (e.g. via `localStorage`). The design system ships no JS for it.
+
+Both variants emit the same HTML under `.app-sidebar-*` class names so a consumer re-skins (osg paints the panel as a parchment scroll) purely via token overrides and side-targeted CSS, without forking the partial.
 
 ## Integration: Hugo consumer quickstart
 

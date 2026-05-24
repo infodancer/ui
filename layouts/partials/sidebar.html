@@ -1,0 +1,25 @@
+{{- /*
+  infodancer/ui — sidebar partial (Hugo variant)
+
+  Renders ONE aside panel from a passed context (NOT site config — sidebar
+  content is usually page-derived). Pass a dict shaped like:
+
+    {{ partial "sidebar.html" (dict "Sections" $sections) }}
+
+  where each section is a dict {Key, Title, Open, Items} and each item is a
+  dict {Label, URL, Meta}. Mirrors the Go `ui/sidebar` partial's markup so a
+  consumer site re-skins both the same way.
+
+  Each section is a native <details> so collapse/expand needs no JS; key a
+  persistence script off data-sidebar-key if you want remembered state.
+*/ -}}
+{{- range .Sections }}
+<details class="app-sidebar-section" data-sidebar-key="{{ .Key }}"{{ if .Open }} open{{ end }}>
+  <summary><h2>{{ .Title }}</h2></summary>
+  <ul class="app-sidebar-feed">
+    {{- range .Items }}
+    <li><a href="{{ .URL }}">{{ .Label }}</a>{{ with .Meta }}<span class="app-sidebar-meta">{{ . }}</span>{{ end }}</li>
+    {{- end }}
+  </ul>
+</details>
+{{- end }}

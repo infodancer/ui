@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.2.1 — 2026-05-23
+
+### Added
+- **Sidebar component.** `.app-sidebar-layout` grids a content column with an optional left and/or right aside (`.has-left` / `.has-right`; neither = full-width); `--app-sidebar-width` token sizes the asides. `.app-sidebar` is a quiet bordered panel of collapsible link sections — `.app-sidebar-section` is a native `<details>` (collapse needs no JS), `.app-sidebar-feed` lists links each with an optional `.app-sidebar-meta` line and `.app-sidebar-count` pill. New `ui/sidebar` partial (Go + Hugo) renders one side from a `SidebarData` (`SidebarSection`/`SidebarItem`); each section emits `data-sidebar-key` so a consumer can persist open/closed state with its own script. Clean default skin; consumers re-skin via token overrides (osg paints it as a parchment scroll).
+
 ## v0.2.0 — 2026-05-23
 
 First tagged release. The earlier nav/footer partials and `--app-*` token

@@ -47,9 +47,10 @@ func AssetsFS() fs.FS {
 }
 
 // PartialsFS returns an [fs.FS] containing the Go html/template partials
-// (`nav.gohtml`, `footer.gohtml`). Parse them with [template.ParseFS]
-// alongside your own templates. The partials define templates `ui/nav`
-// and `ui/footer`; render via `{{ template "ui/nav" .Nav }}` etc.
+// (`nav.gohtml`, `footer.gohtml`, `sidebar.gohtml`). Parse them with
+// [template.ParseFS] alongside your own templates. The partials define
+// templates `ui/nav`, `ui/footer`, and `ui/sidebar`; render via
+// `{{ template "ui/nav" .Nav }}` etc.
 func PartialsFS() fs.FS {
 	sub, err := fs.Sub(partialsRoot, "partials")
 	if err != nil {
@@ -94,4 +95,33 @@ type FooterData struct {
 type FooterLink struct {
 	Label string
 	URL   string
+}
+
+// SidebarData is the documented data shape for the `ui/sidebar` partial: one
+// aside panel of collapsible link sections. Any struct with the same fields
+// works. The partial is side-unaware — the page layout decides whether this
+// is a left or right aside (add .has-left / .has-right to .app-sidebar-layout
+// and wrap the render in the matching <aside>). A page may render two,
+// passing a separate SidebarData to each side.
+type SidebarData struct {
+	Sections []SidebarSection
+}
+
+// SidebarSection is one collapsible group within a sidebar. Key is a stable
+// identifier emitted as data-sidebar-key, so a consumer's optional
+// persistence script can remember the open/closed state across pages. Open
+// sets the default expanded state.
+type SidebarSection struct {
+	Key   string
+	Title string
+	Open  bool
+	Items []SidebarItem
+}
+
+// SidebarItem is one link in a sidebar section. Meta is an optional muted
+// secondary line (a timestamp, a campaign name, a count).
+type SidebarItem struct {
+	Label string
+	URL   string
+	Meta  string
 }

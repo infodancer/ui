@@ -1,0 +1,31 @@
+{{- /*
+  infodancer/ui — sidebar partial (Go html/template variant)
+
+  Renders ONE aside panel from a ui.SidebarData (or a struct with the same
+  shape):
+    Sections []SidebarSection      // each {Key, Title, Open, Items}
+      Key    string                // stable id -> data-sidebar-key
+      Title  string
+      Open   bool                  // default-expanded?
+      Items  []SidebarItem         // each {Label, URL, Meta}
+
+  Each section is a native <details> so collapse/expand needs no JS. A
+  consumer that wants the open/closed state remembered keys its own script
+  off the data-sidebar-key attribute.
+
+  This partial is side-unaware: the page layout places the <aside> and adds
+  the .has-left / .has-right modifier on .app-sidebar-layout. Render via:
+    <aside class="app-sidebar app-sidebar-right">{{ template "ui/sidebar" .RightSidebar }}</aside>
+*/ -}}
+{{ define "ui/sidebar" -}}
+{{- range .Sections }}
+<details class="app-sidebar-section" data-sidebar-key="{{ .Key }}"{{ if .Open }} open{{ end }}>
+  <summary><h2>{{ .Title }}</h2></summary>
+  <ul class="app-sidebar-feed">
+    {{- range .Items }}
+    <li><a href="{{ .URL }}">{{ .Label }}</a>{{ with .Meta }}<span class="app-sidebar-meta">{{ . }}</span>{{ end }}</li>
+    {{- end }}
+  </ul>
+</details>
+{{- end }}
+{{- end }}

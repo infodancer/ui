@@ -53,7 +53,7 @@ func TestTokensCSS_HasAllDocumentedTokens(t *testing.T) {
 		// Elevation
 		"--app-shadow", "--app-shadow-lg",
 		// Layout
-		"--app-max-width-prose", "--app-max-width-page",
+		"--app-max-width-prose", "--app-max-width-page", "--app-sidebar-width",
 	}
 	for _, tok := range tokens {
 		// Match the property declaration ("--app-foo:") to avoid false
@@ -108,6 +108,10 @@ func TestBaseCSS_HasAllUtilityClasses(t *testing.T) {
 		".app-panel", ".app-panel-accent",
 		// Page header + section
 		".app-page-header", ".app-page-meta", ".app-section",
+		// Sidebar layout + panel
+		".app-sidebar-layout", ".app-sidebar-main", ".app-sidebar",
+		".app-sidebar-section", ".app-sidebar-feed", ".app-sidebar-meta",
+		".app-sidebar-count",
 		// Accessibility
 		".app-visually-hidden",
 	}
@@ -121,7 +125,7 @@ func TestBaseCSS_HasAllUtilityClasses(t *testing.T) {
 func TestPartialsFS_HasNavAndFooter(t *testing.T) {
 	t.Parallel()
 	fsys := ui.PartialsFS()
-	for _, path := range []string{"nav.gohtml", "footer.gohtml"} {
+	for _, path := range []string{"nav.gohtml", "footer.gohtml", "sidebar.gohtml"} {
 		b, err := fs.ReadFile(fsys, path)
 		if err != nil {
 			t.Errorf("PartialsFS missing %s: %v", path, err)
@@ -139,10 +143,61 @@ func TestPartialsFS_ParsesAsTemplates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseFS: %v", err)
 	}
-	for _, name := range []string{"ui/nav", "ui/footer"} {
+	for _, name := range []string{"ui/nav", "ui/footer", "ui/sidebar"} {
 		if got := tmpl.Lookup(name); got == nil {
 			t.Errorf("template %q not registered after ParseFS", name)
 		}
+	}
+}
+
+func TestSidebar_RendersSections(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := ui.SidebarData{
+		Sections: []ui.SidebarSection{
+			{
+				Key:   "recent",
+				Title: "Recently Updated",
+				Open:  true,
+				Items: []ui.SidebarItem{
+					{Label: "First Post", URL: "/p/1", Meta: "2 days ago"},
+					{Label: "Second Post", URL: "/p/2"},
+				},
+			},
+			{Key: "tags", Title: "Tags", Items: []ui.SidebarItem{{Label: "osr", URL: "/tags/osr"}}},
+		},
+	}
+	var buf bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&buf, "ui/sidebar", data); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		`data-sidebar-key="recent"`,
+		`data-sidebar-key="tags"`,
+		"Recently Updated",
+		`href="/p/1"`,
+		"First Post",
+		`class="app-sidebar-meta"`,
+		"2 days ago",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("sidebar output missing %q\noutput:\n%s", want, out)
+		}
+	}
+	// Open section carries the open attribute; the default-collapsed one must not.
+	if !strings.Contains(out, `data-sidebar-key="recent" open`) {
+		t.Errorf("section marked Open should render the open attribute\noutput:\n%s", out)
+	}
+	if strings.Contains(out, `data-sidebar-key="tags" open`) {
+		t.Errorf("default section should be collapsed (no open attribute)\noutput:\n%s", out)
+	}
+	// An item without Meta omits the meta span entirely (no empty span).
+	if strings.Count(out, `class="app-sidebar-meta"`) != 1 {
+		t.Errorf("expected exactly one meta span (only the item with Meta)\noutput:\n%s", out)
 	}
 }
 
