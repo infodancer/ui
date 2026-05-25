@@ -1,0 +1,23 @@
+{{- /*
+  infodancer/ui — htmx head partial (Hugo variant)
+
+  Emits the <script> tag that loads the vendored htmx library, with a
+  Subresource Integrity hash Hugo computes over the asset at build time
+  (so the hash always matches the served bytes). Place it in your <head>:
+
+    {{ partial "htmx-head" . }}
+
+  This is the Hugo counterpart of the Go ui.HeadTags helper. It is opt-in:
+  a site that doesn't want htmx simply doesn't call it, and no JS is loaded.
+  ui still frames the site with its CSS and partials either way.
+
+  The asset is matched by glob (js/htmx-*.min.js), so bumping the vendored
+  htmx version only means swapping the file in assets/js/ — this partial
+  needs no edit. sha384 matches the algorithm the Go HeadTags helper pins.
+*/ -}}
+{{- with resources.GetMatch "js/htmx-*.min.js" -}}
+{{- $htmx := . | fingerprint "sha384" -}}
+<script src="{{ $htmx.RelPermalink }}" integrity="{{ $htmx.Data.Integrity }}" crossorigin="anonymous" defer></script>
+{{- else -}}
+{{- warnf "infodancer/ui: htmx-head partial found no js/htmx-*.min.js asset" -}}
+{{- end -}}

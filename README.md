@@ -44,6 +44,15 @@ Pipe the CSS and render the partials from your base layout:
 {{ partial "footer" . }}
 ```
 
+Add htmx (optional) in your `<head>` — the partial fingerprints the vendored library and emits an SRI-pinned `<script>`:
+
+```html
+<head>
+  ...
+  {{ partial "htmx-head" . }}
+</head>
+```
+
 Provide your site's palette in `assets/css/site.css`:
 
 ```css
@@ -76,6 +85,33 @@ Pass a `ui.NavData` (or any struct with matching fields) to the partial:
 <main>{{ block "main" . }}{{ end }}</main>
 {{ template "ui/footer" .Footer }}
 ```
+
+### htmx (optional)
+
+ui ships [htmx](https://htmx.org) as the stack's interactivity layer, vendored and served from the same `AssetsFS()` mount. Add it to your page `<head>` — it's opt-in, so a consumer that doesn't want it just omits this:
+
+```go
+// in your view data: HTMXHead: ui.HeadTags("/static/ui")
+```
+
+```gohtml
+<head>
+  <link rel="stylesheet" href="/static/ui/css/tokens.css">
+  <link rel="stylesheet" href="/static/ui/css/base.css">
+  {{ .HTMXHead }}
+</head>
+```
+
+In handlers, the `HX-*` boundary helpers save you re-implementing them:
+
+```go
+if ui.IsRequest(r) {            // HX-Request: render a fragment, not the full page
+    return tmpl.ExecuteTemplate(w, "note/fragment", data)
+}
+ui.Redirect(w, "/campaign/x")   // HX-Redirect (htmx ignores a 3xx Location)
+```
+
+See [DESIGN.md](DESIGN.md#interactivity-htmx) for the full helper list and the Layer 1 / Layer 2 independence contract.
 
 ## Status
 

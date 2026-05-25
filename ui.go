@@ -33,10 +33,11 @@ var assetsRoot embed.FS
 var partialsRoot embed.FS
 
 // AssetsFS returns an [fs.FS] rooted at the `assets/` directory. It
-// contains `css/tokens.css` and `css/base.css`. Mount it via
-// [http.FileServer] under your static path; consumers typically link the
+// contains `css/tokens.css`, `css/base.css`, and the vendored htmx library
+// at `js/htmx-<version>.min.js` (see [HeadTags] and [HTMXVersion]). Mount it
+// via [http.FileServer] under your static path; consumers typically link the
 // two CSS files in <head> with a third site-specific stylesheet loaded
-// after for palette overrides.
+// after for palette overrides, and add htmx with [HeadTags] if they want it.
 func AssetsFS() fs.FS {
 	sub, err := fs.Sub(assetsRoot, "assets")
 	if err != nil {
