@@ -77,6 +77,33 @@ Pass a `ui.NavData` (or any struct with matching fields) to the partial:
 {{ template "ui/footer" .Footer }}
 ```
 
+### htmx (optional)
+
+ui ships [htmx](https://htmx.org) as the stack's interactivity layer, vendored and served from the same `AssetsFS()` mount. Add it to your page `<head>` — it's opt-in, so a consumer that doesn't want it just omits this:
+
+```go
+// in your view data: HTMXHead: ui.HeadTags("/static/ui")
+```
+
+```gohtml
+<head>
+  <link rel="stylesheet" href="/static/ui/css/tokens.css">
+  <link rel="stylesheet" href="/static/ui/css/base.css">
+  {{ .HTMXHead }}
+</head>
+```
+
+In handlers, the `HX-*` boundary helpers save you re-implementing them:
+
+```go
+if ui.IsRequest(r) {            // HX-Request: render a fragment, not the full page
+    return tmpl.ExecuteTemplate(w, "note/fragment", data)
+}
+ui.Redirect(w, "/campaign/x")   // HX-Redirect (htmx ignores a 3xx Location)
+```
+
+See [DESIGN.md](DESIGN.md#interactivity-htmx) for the full helper list and the Layer 1 / Layer 2 independence contract.
+
 ## Status
 
 v0.1 initial design (2026-05-19). Token vocabulary proposed but not yet locked; first real integration drives the lock. Not yet tagged.

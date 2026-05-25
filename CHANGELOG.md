@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+### Added
+- **htmx component (opt-in).** ui now ships [htmx](https://htmx.org) v2.0.10 as its chosen interactivity layer, vendored under `assets/js/` and served via the existing `AssetsFS()`. `HeadTags(staticBase)` emits the `<script>` tag with a Subresource Integrity hash (self-hosted, no CDN). Go request/response helpers cover the boundary every htmx consumer otherwise re-implements: `IsRequest`, `IsBoosted`, `Target` (read `HX-*` request headers) and `Redirect`, `Refresh`, `PushURL`, `Retarget`, `Reswap`, `Trigger` (set `HX-*` response headers). `HTMXVersion` exposes the pinned version. This is "Layer 1" — pure mechanism with **no dependency on a base template**; a consumer that doesn't call `HeadTags` loads no JS. The DESIGN.md JavaScript exclusion is superseded; see the new "Interactivity: htmx" section. (Hugo-side partial parity is a follow-up.)
+
 ## v0.2.1 — 2026-05-23
 
 ### Added

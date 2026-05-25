@@ -26,7 +26,7 @@ The package is deliberately small. v0.1 ships **design tokens** (CSS custom prop
 
 - Cards, buttons-as-system, forms-as-design-system, full color components. Those live inside feature modules until duplication forces extraction. (The small set of recurring utility patterns extracted in v0.1 — badge base, comments, list chrome, sort tabs, tag chips, pager, search row, visually-hidden — *are* in `base.css`; see "Base stylesheet" below.)
 - Dark mode. Tokens are designed so a dark variant is *trivial to add later* by overriding `:root` in a `@media (prefers-color-scheme: dark)` block, but v0.1 ships a single light palette by default and lets each consumer supply dark overrides if they want them.
-- JavaScript. `infodancer/ui` is HTML + CSS. Interactivity is the consumer's problem (htmx, vanilla JS, whatever).
+- JavaScript. *(Superseded post-v0.2 — see [Interactivity: htmx](#interactivity-htmx).)* v0.1 shipped no JS. The stack has since adopted htmx as its chosen interactivity layer, vendored and served by ui as an **opt-in** component. ui is still fully usable with no JS — htmx loads only if a consumer calls `HeadTags`.
 - Iconography. Consumers ship their own icons; the partials use plain text marks where applicable.
 - Layout primitives beyond `max-width-*`. No grid system, no flex helper classes. Components compose with CSS directly.
 
@@ -351,6 +351,29 @@ Both variants emit the same HTML under `.app-sidebar-*` class names so a consume
    ```
 
    Where `.Nav` is a `ui.NavData` (or a struct with the same shape — html/template duck-types by field name).
+
+## Interactivity: htmx
+
+ui's chosen interactivity layer is [htmx](https://htmx.org). The minified library (v2.0.10) is vendored under `assets/js/` and served through `AssetsFS()` exactly like the CSS; `HeadTags(staticBase)` emits the `<script>` tag with a Subresource Integrity hash so the browser rejects a tampered file. It is **self-hosted, not a CDN** — the dependency stays inside the consumer's origin and the SRI stays honest. (faq's `unpkg` tag is the anti-pattern this replaces.)
+
+Go consumers also get the request/response boundary helpers every htmx app otherwise re-implements:
+
+- Read `HX-*` request headers: `IsRequest`, `IsBoosted`, `Target`.
+- Set `HX-*` response headers: `Redirect`, `Refresh`, `PushURL`, `Retarget`, `Reswap`, `Trigger`.
+
+### Optional and self-contained — "Layer 1" vs "Layer 2"
+
+The htmx support above ("Layer 1") is pure mechanism with **no dependency on any base template.** A consumer keeps its own HTML document, calls `HeadTags` in its `<head>`, and uses the helpers in handlers. A consumer that wants a different interactivity stack simply never calls `HeadTags` — no htmx is loaded, and ui still frames it with its CSS and partials.
+
+A forthcoming **optional** base document template ("Layer 2") will wire htmx in by default for consumers that want the full shell, but it will be *just another consumer of Layer 1*. The invariant: **Layer 1 stays usable without Layer 2, and the Layer 1 helpers never assume the base template exists.** The dependency only flows Layer 2 → Layer 1, never the reverse — mirroring how `AssetsFS()` (CSS) is already usable without rendering any partial.
+
+### Version bumps and CSP
+
+Bumping the vendored htmx version means changing `HTMXVersion`, the asset filename, and the `htmxSRI` hash in `htmx.go` together (the regeneration command is in the doc comment). htmx 2.x runs without `unsafe-eval` by default, so a consumer's CSP needs only its usual same-origin `script-src`; the `integrity` attribute enforces the hash automatically.
+
+### Hugo parity (pending)
+
+Per the two-consumer model, the htmx component currently ships the **Go-side** helpers + the vendored asset (which a Hugo consumer can also serve from the module mount via `resources.Get "js/htmx-2.0.10.min.js"`). A first-class Hugo partial emitting the SRI-pinned tag is a follow-up; the immediate consumer (osg) is on the Go path and is migrating off Hugo.
 
 ## Versioning
 
