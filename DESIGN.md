@@ -371,9 +371,15 @@ A forthcoming **optional** base document template ("Layer 2") will wire htmx in 
 
 Bumping the vendored htmx version means changing `HTMXVersion`, the asset filename, and the `htmxSRI` hash in `htmx.go` together (the regeneration command is in the doc comment). htmx 2.x runs without `unsafe-eval` by default, so a consumer's CSP needs only its usual same-origin `script-src`; the `integrity` attribute enforces the hash automatically.
 
-### Hugo parity (pending)
+### Hugo variant
 
-Per the two-consumer model, the htmx component currently ships the **Go-side** helpers + the vendored asset (which a Hugo consumer can also serve from the module mount via `resources.Get "js/htmx-2.0.10.min.js"`). A first-class Hugo partial emitting the SRI-pinned tag is a follow-up; the immediate consumer (osg) is on the Go path and is migrating off Hugo.
+Per the two-consumer model, the htmx component ships in both worlds. The Hugo partial `layouts/partials/htmx-head.html` is the counterpart of the Go `HeadTags` helper:
+
+```html
+{{ partial "htmx-head" . }}   {{/* in your <head> */}}
+```
+
+It `resources.GetMatch`es the vendored `js/htmx-*.min.js` (glob, so bumping the version needs no partial edit), `fingerprint "sha384"`s it, and emits the `<script>` with `RelPermalink` + the Hugo-computed `Data.Integrity`. Because both sides hash the same bytes with sha384, **the Hugo build's integrity value equals the SRI constant the Go `HeadTags` pins** — the two consumer paths serve byte-identical htmx. Opt-in the same way: a site that never calls the partial loads no JS.
 
 ## Versioning
 

@@ -44,6 +44,15 @@ Pipe the CSS and render the partials from your base layout:
 {{ partial "footer" . }}
 ```
 
+Add htmx (optional) in your `<head>` — the partial fingerprints the vendored library and emits an SRI-pinned `<script>`:
+
+```html
+<head>
+  ...
+  {{ partial "htmx-head" . }}
+</head>
+```
+
 Provide your site's palette in `assets/css/site.css`:
 
 ```css
