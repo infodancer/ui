@@ -22,7 +22,10 @@
 package ui
 
 import (
+	"bytes"
 	"embed"
+	"encoding/json"
+	"html/template"
 	"io/fs"
 )
 
@@ -48,9 +51,9 @@ func AssetsFS() fs.FS {
 }
 
 // PartialsFS returns an [fs.FS] containing the Go html/template partials
-// (`nav.gohtml`, `footer.gohtml`, `sidebar.gohtml`). Parse them with
-// [template.ParseFS] alongside your own templates. The partials define
-// templates `ui/nav`, `ui/footer`, and `ui/sidebar`; render via
+// (`nav.gohtml`, `footer.gohtml`, `sidebar.gohtml`, `meta.gohtml`). Parse them
+// with [template.ParseFS] alongside your own templates. The partials define
+// templates `ui/nav`, `ui/footer`, `ui/sidebar`, and `ui/meta`; render via
 // `{{ template "ui/nav" .Nav }}` etc.
 func PartialsFS() fs.FS {
 	sub, err := fs.Sub(partialsRoot, "partials")
@@ -125,4 +128,55 @@ type SidebarItem struct {
 	Label string
 	URL   string
 	Meta  string
+}
+
+// Meta is the documented data shape for the `ui/meta` partial: the SEO and
+// social <head> tags a page emits. Any struct with the same fields works.
+//
+// Every field is optional — an empty field emits nothing, so a page fills
+// only what it has. ui renders the tags but has no opinion about their
+// content: the description copy, canonical policy, and the schema.org graph
+// are the consuming app's domain, not a generic toolkit's. The partial wires
+// the values it's given into the standard description / OpenGraph / Twitter /
+// JSON-LD markup.
+//
+// Defaults the partial supplies when a field is empty:
+//   - Type   -> "website" (og:type)
+//   - the Twitter card is "summary_large_image" when Image is set, else "summary"
+//
+// JSONLD carries complete <script type="application/ld+json"> elements. Build
+// each with [JSONLD], which marshals a value and escapes it so it cannot break
+// out of the script element. The slot is plural because a page commonly emits
+// several graphs (e.g. an Article plus a BreadcrumbList).
+type Meta struct {
+	Description string          // meta description + og/twitter description
+	Canonical   string          // <link rel="canonical"> + og:url
+	Title       string          // og:title / twitter:title (the page <title> stays the page's own)
+	SiteName    string          // og:site_name
+	Type        string          // og:type; defaults "website"
+	Image       string          // absolute URL; og:image + twitter:image
+	Locale      string          // og:locale (e.g. "en_US")
+	JSONLD      []template.HTML // complete <script> elements; build with [JSONLD]
+}
+
+// JSONLD marshals v as JSON-LD and wraps it in a
+// <script type="application/ld+json"> element suitable for the document
+// <head>. v is typically a map[string]any (or a slice/struct) describing a
+// schema.org graph.
+//
+// Marshaling uses encoding/json, which escapes '<', '>', and '&' as \u00XX
+// sequences. That keeps a value containing "</script>" from terminating the
+// surrounding element — the data can carry arbitrary text without enabling a
+// markup-injection breakout. The result is therefore safe to emit verbatim as
+// template.HTML.
+func JSONLD(v any) (template.HTML, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	buf.WriteString(`<script type="application/ld+json">`)
+	buf.Write(b)
+	buf.WriteString(`</script>`)
+	return template.HTML(buf.String()), nil //nolint:gosec // json.Marshal escapes <,>,& so the body cannot break out of the script element
 }

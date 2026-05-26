@@ -12,7 +12,7 @@ A small CSS + template library:
 
 - **Design tokens** — CSS custom properties under the `--app-*` prefix covering color, typography, spacing, radii, and layout primitives. Tokens are the public API; everything else is implementation detail.
 - **Base stylesheet** — a minimal reset plus sensible defaults for typography, lists, links, code, basic form elements. ~150 lines.
-- **`nav` and `footer` partials** — top nav strip and footer, shipped in **parallel Hugo and Go variants** producing identical output but each idiomatic to its host engine.
+- **`nav`, `footer`, `sidebar`, and `meta` partials** — chrome (nav strip, footer, collapsible sidebar) plus the SEO/social `<head>` tags (`meta`), shipped in **parallel Hugo and Go variants** producing identical output but each idiomatic to its host engine.
 
 What it deliberately is *not*: a component framework, a JS toolkit, an icon set, or a build pipeline. See [DESIGN.md](DESIGN.md) for scope rationale.
 

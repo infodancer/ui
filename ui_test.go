@@ -379,3 +379,122 @@ func TestRealisticConsumerIntegration(t *testing.T) {
 		}
 	}
 }
+
+func TestPartialsFS_HasMeta(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatalf("ParseFS: %v", err)
+	}
+	if tmpl.Lookup("ui/meta") == nil {
+		t.Error(`template "ui/meta" not registered after ParseFS`)
+	}
+}
+
+func TestMeta_RendersTags(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ld, err := ui.JSONLD(map[string]any{"@context": "https://schema.org", "@type": "WebSite"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := ui.Meta{
+		Description: "A campaign chronicle.",
+		Canonical:   "https://example.org/c/1",
+		Title:       "Session 1",
+		SiteName:    "Example",
+		Type:        "article",
+		Image:       "https://example.org/img.webp",
+		Locale:      "en_US",
+		JSONLD:      []template.HTML{ld},
+	}
+	var buf bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&buf, "ui/meta", data); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		`<meta name="description" content="A campaign chronicle.">`,
+		`<link rel="canonical" href="https://example.org/c/1">`,
+		`<meta property="og:type" content="article">`,
+		`<meta property="og:title" content="Session 1">`,
+		`<meta property="og:description" content="A campaign chronicle.">`,
+		`<meta property="og:url" content="https://example.org/c/1">`,
+		`<meta property="og:site_name" content="Example">`,
+		`<meta property="og:image" content="https://example.org/img.webp">`,
+		`<meta property="og:locale" content="en_US">`,
+		`<meta name="twitter:card" content="summary_large_image">`,
+		`<meta name="twitter:title" content="Session 1">`,
+		`<meta name="twitter:image" content="https://example.org/img.webp">`,
+		`<script type="application/ld+json">`,
+		`"@type":"WebSite"`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("meta output missing %q\n--- got ---\n%s", want, out)
+		}
+	}
+}
+
+func TestMeta_EmptyOmits(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&buf, "ui/meta", ui.Meta{}); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	for _, absent := range []string{
+		`name="description"`,
+		`rel="canonical"`,
+		`property="og:image"`,
+		`property="og:title"`,
+		`application/ld+json`,
+	} {
+		if strings.Contains(out, absent) {
+			t.Errorf("empty meta should omit %q\n--- got ---\n%s", absent, out)
+		}
+	}
+	// og:type defaults to website and the twitter card falls back to summary.
+	for _, want := range []string{
+		`<meta property="og:type" content="website">`,
+		`<meta name="twitter:card" content="summary">`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("empty meta missing default %q", want)
+		}
+	}
+}
+
+func TestJSONLD_WrapsAndEscapes(t *testing.T) {
+	t.Parallel()
+	// A value containing a </script> sequence must be escaped so it cannot
+	// break out of the surrounding <script> element.
+	got, err := ui.JSONLD(map[string]any{
+		"@context": "https://schema.org",
+		"@type":    "Article",
+		"headline": "Mind the </script> gap",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(got)
+	if !strings.HasPrefix(s, `<script type="application/ld+json">`) {
+		t.Errorf("missing script open: %s", s)
+	}
+	if !strings.HasSuffix(s, "</script>") {
+		t.Errorf("missing script close: %s", s)
+	}
+	if strings.Contains(s, "</script> gap") {
+		t.Errorf("raw </script> leaked into output, breakout possible: %s", s)
+	}
+	escaped := "\\u003c/script\\u003e gap"
+	if !strings.Contains(s, escaped) {
+		t.Errorf("expected </script> in data escaped as %s, got: %s", escaped, s)
+	}
+}

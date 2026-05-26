@@ -280,6 +280,33 @@ type SidebarItem struct {
 
 Both variants emit the same HTML under `.app-sidebar-*` class names so a consumer re-skins (osg paints the panel as a parchment scroll) purely via token overrides and side-targeted CSS, without forking the partial.
 
+### `meta`
+
+The SEO and social `<head>` tags — `meta description`, `link canonical`, the OpenGraph block, a Twitter card, and JSON-LD. Emits **no styling** (it's head markup, not body chrome), so unlike nav/footer/sidebar there are no `.app-*` classes and nothing in `base.css` to override. The partial is *content-unaware*: it wires whatever values the consumer hands it into the standard tags. The copy, the canonical policy, and the schema.org graphs are the consumer's domain — a generic toolkit has no business deciding them.
+
+Every field is optional; an empty field emits nothing. `Type` defaults to `website`; the Twitter card is `summary_large_image` when an `Image` is set, else `summary`.
+
+**Go data shape:**
+
+```go
+type Meta struct {
+    Description string          // meta description + og/twitter description
+    Canonical   string          // <link rel="canonical"> + og:url
+    Title       string          // og:title / twitter:title
+    SiteName    string          // og:site_name
+    Type        string          // og:type; defaults "website"
+    Image       string          // absolute URL; og:image + twitter:image
+    Locale      string          // og:locale (e.g. "en_US")
+    JSONLD      []template.HTML // complete <script> elements; build with ui.JSONLD
+}
+```
+
+Render via `{{ template "ui/meta" .Meta }}` inside `<head>`.
+
+**JSON-LD.** The `JSONLD` slot is plural because a page commonly emits several graphs (an `Article` plus a `BreadcrumbList`, say). Build each element with the `JSONLD(v any) (template.HTML, error)` helper: it marshals `v` (typically a `map[string]any` schema.org graph) with `encoding/json` and wraps it in `<script type="application/ld+json">`. `json.Marshal` escapes `<`, `>`, and `&`, so a value containing `</script>` can't terminate the element — the body is safe to emit verbatim as `template.HTML`.
+
+**Hugo variant** takes a passed context (head metadata is page-derived, not site config): `{{ partial "meta" (dict "Description" .Description "Canonical" .Permalink "Title" .Title "SiteName" site.Title "Type" "article" "JSONLD" (slice $graphJSON)) }}`. `JSONLD` is a slice of complete `<script>` elements built with `jsonify` + `safeHTML`; Hugo's `jsonify` escapes `<`, `>`, `&` for the same breakout guarantee the Go helper gives.
+
 ## Integration: Hugo consumer quickstart
 
 1. Add `infodancer/ui` to the site's module config:

@@ -1,0 +1,65 @@
+{{- /*
+  infodancer/ui — meta partial (Go html/template variant)
+
+  Renders the SEO and social <head> tags from a ui.Meta (or a struct with the
+  same shape):
+    Description string          // meta description + og/twitter description
+    Canonical   string          // <link rel="canonical"> + og:url
+    Title       string          // og:title / twitter:title
+    SiteName    string          // og:site_name
+    Type        string          // og:type; defaults "website"
+    Image       string          // absolute URL; og:image + twitter:image
+    Locale      string          // og:locale
+    JSONLD      []template.HTML // complete <script> elements (build with ui.JSONLD)
+
+  Every field is optional: an empty field emits nothing. og:type falls back to
+  "website" and the Twitter card to "summary" (or "summary_large_image" when an
+  Image is set). Place the render inside <head>:
+
+    {{ template "ui/meta" .Meta }}
+
+  The toolkit emits the tags but owns none of the content — the consumer
+  supplies the copy and, via ui.JSONLD, any schema.org graphs. JSON-LD arrives
+  pre-wrapped as template.HTML so the script content is escaped at build time
+  and can't break out of the element.
+*/ -}}
+{{ define "ui/meta" -}}
+{{- with .Description }}
+<meta name="description" content="{{ . }}">
+{{- end }}
+{{- with .Canonical }}
+<link rel="canonical" href="{{ . }}">
+{{- end }}
+<meta property="og:type" content="{{ with .Type }}{{ . }}{{ else }}website{{ end }}">
+{{- with .Title }}
+<meta property="og:title" content="{{ . }}">
+{{- end }}
+{{- with .Description }}
+<meta property="og:description" content="{{ . }}">
+{{- end }}
+{{- with .Canonical }}
+<meta property="og:url" content="{{ . }}">
+{{- end }}
+{{- with .SiteName }}
+<meta property="og:site_name" content="{{ . }}">
+{{- end }}
+{{- with .Locale }}
+<meta property="og:locale" content="{{ . }}">
+{{- end }}
+{{- with .Image }}
+<meta property="og:image" content="{{ . }}">
+{{- end }}
+<meta name="twitter:card" content="{{ if .Image }}summary_large_image{{ else }}summary{{ end }}">
+{{- with .Title }}
+<meta name="twitter:title" content="{{ . }}">
+{{- end }}
+{{- with .Description }}
+<meta name="twitter:description" content="{{ . }}">
+{{- end }}
+{{- with .Image }}
+<meta name="twitter:image" content="{{ . }}">
+{{- end }}
+{{- range .JSONLD }}
+{{ . }}
+{{- end }}
+{{- end }}
