@@ -1,0 +1,67 @@
+{{- /*
+  infodancer/ui — meta partial (Hugo variant)
+
+  The Hugo counterpart of the Go `ui/meta` partial and the ui.Meta data shape.
+  Emits the SEO and social <head> tags from a passed context (these values are
+  page-derived, not site config). Pass a dict:
+
+    {{ partial "meta" (dict
+        "Description" .Description
+        "Canonical"   .Permalink
+        "Title"       .Title
+        "SiteName"    site.Title
+        "Type"        "article"
+        "Image"       $absImageURL
+        "Locale"      "en_US"
+        "JSONLD"      (slice $articleJSON $breadcrumbJSON)) }}
+
+  Every key is optional: an empty value emits nothing. og:type falls back to
+  "website" and the Twitter card to "summary" (or "summary_large_image" when an
+  Image is given).
+
+  JSONLD is a slice of complete <script type="application/ld+json"> elements,
+  already safe HTML. Build each in the consumer with jsonify + safeHTML, e.g.
+
+    {{ $articleJSON := printf `<script type="application/ld+json">%s</script>` ($graph | jsonify) | safeHTML }}
+
+  Hugo's jsonify escapes <, >, and & so the JSON cannot break out of the
+  script element — the same guarantee the Go ui.JSONLD helper provides.
+*/ -}}
+{{- with .Description }}
+<meta name="description" content="{{ . }}">
+{{- end }}
+{{- with .Canonical }}
+<link rel="canonical" href="{{ . }}">
+{{- end }}
+<meta property="og:type" content="{{ with .Type }}{{ . }}{{ else }}website{{ end }}">
+{{- with .Title }}
+<meta property="og:title" content="{{ . }}">
+{{- end }}
+{{- with .Description }}
+<meta property="og:description" content="{{ . }}">
+{{- end }}
+{{- with .Canonical }}
+<meta property="og:url" content="{{ . }}">
+{{- end }}
+{{- with .SiteName }}
+<meta property="og:site_name" content="{{ . }}">
+{{- end }}
+{{- with .Locale }}
+<meta property="og:locale" content="{{ . }}">
+{{- end }}
+{{- with .Image }}
+<meta property="og:image" content="{{ . }}">
+{{- end }}
+<meta name="twitter:card" content="{{ if .Image }}summary_large_image{{ else }}summary{{ end }}">
+{{- with .Title }}
+<meta name="twitter:title" content="{{ . }}">
+{{- end }}
+{{- with .Description }}
+<meta name="twitter:description" content="{{ . }}">
+{{- end }}
+{{- with .Image }}
+<meta name="twitter:image" content="{{ . }}">
+{{- end }}
+{{- range .JSONLD }}
+{{ . }}
+{{- end }}
