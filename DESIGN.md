@@ -392,7 +392,29 @@ Go consumers also get the request/response boundary helpers every htmx app other
 
 The htmx support above ("Layer 1") is pure mechanism with **no dependency on any base template.** A consumer keeps its own HTML document, calls `HeadTags` in its `<head>`, and uses the helpers in handlers. A consumer that wants a different interactivity stack simply never calls `HeadTags` — no htmx is loaded, and ui still frames it with its CSS and partials.
 
-A forthcoming **optional** base document template ("Layer 2") will wire htmx in by default for consumers that want the full shell, but it will be *just another consumer of Layer 1*. The invariant: **Layer 1 stays usable without Layer 2, and the Layer 1 helpers never assume the base template exists.** The dependency only flows Layer 2 → Layer 1, never the reverse — mirroring how `AssetsFS()` (CSS) is already usable without rendering any partial.
+The **optional** base document template ("Layer 2") is the `ui/document` partial (Go variant shipped; see below). It is *just another consumer of Layer 1*: it renders a complete `<html>` page that wires in the CSS, `ui/meta`, `ui/nav`/`ui/footer`/`ui/sidebar`, the optional `ui/analytics` scripts, and htmx — the last surfaced through the `HeadTags` field of `DocumentData`, so htmx stays opt-in (set the field to load it, leave it zero to load none). The invariant holds: **Layer 1 stays usable without Layer 2, and the Layer 1 helpers never assume the base template exists.** The dependency only flows Layer 2 → Layer 1, never the reverse — mirroring how `AssetsFS()` (CSS) is already usable without rendering any partial.
+
+#### The `ui/document` block contract
+
+`ui/document` takes a `DocumentData` (chrome + head config) and pulls the page body from template *blocks* the consumer defines, then ends with `{{ template "ui/document" . }}`:
+
+| Block     | Required | Purpose                                                        |
+|-----------|----------|----------------------------------------------------------------|
+| `content` | yes      | page body, rendered in the main column                         |
+| `title`   | no       | `<title>` text; defaults to `.Meta.SiteName`                   |
+| `head`    | no       | extra `<head>` markup (page `<style>`, preloads)               |
+| `nav`     | no       | overrides the default `{{ template "ui/nav" .Nav }}`           |
+| `footer`  | no       | overrides the default `{{ template "ui/footer" .Footer }}`     |
+
+Parse the ui partials **before** the consumer page so the page's block definitions win over `ui/document`'s defaults (the override is last-definition-wins across the template set).
+
+#### The `ui/analytics` component
+
+`ui/analytics` renders the optional web-analytics `<head>` scripts (Umami and/or Plausible) from an `Analytics` value. ui owns the markup; the consumer passes its own script URLs and IDs — nothing property-specific is baked into the toolkit, and a `nil` member emits nothing. `ui/document` includes it automatically when `DocumentData.Analytics` is non-nil; it can also be rendered on its own.
+
+#### Hugo variant (deferred)
+
+`ui/document` and `ui/analytics` ship the Go variant only for now — a deliberate, documented exception to the parallel-variant rule. The first Layer 2 consumer (osg) is migrating Hugo pages *to* Go; its remaining Hugo pages use a different theme's base template, not ui's. Add `layouts/partials/document.html` / `analytics.html` when a Hugo consumer actually wants the full ui shell.
 
 ### Version bumps and CSP
 

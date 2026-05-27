@@ -1,0 +1,64 @@
+{{- /*
+  infodancer/ui — document partial (Go html/template variant), the "Layer 2"
+  base document skeleton.
+
+  Renders a complete <html> page from a ui.DocumentData (or a struct with the
+  same fields), wiring in the Layer 1 pieces: ui CSS, ui/meta, optional htmx
+  (via the HeadTags field), ui/analytics, ui/nav, ui/sidebar, ui/footer. It is
+  itself just a Layer 1 consumer — the dependency only flows Layer 2 -> Layer 1.
+
+  Content comes from template blocks the consumer defines, not from a field.
+  A page template defines the blocks and ends with:
+
+    {{ template "ui/document" . }}
+
+  Block contract:
+    content  REQUIRED  page body (rendered in the main column)
+    title    optional  <title> text; defaults to .Meta.SiteName
+    head     optional  extra <head> markup (page <style>, preloads, ...)
+    nav      optional  overrides the default {{ template "ui/nav" .Nav }}
+    footer   optional  overrides the default {{ template "ui/footer" .Footer }}
+
+  Layout classes (.app-container, .app-sidebar-layout, .app-sidebar-main,
+  .has-left/.has-right) are the same ones ui's sidebar CSS targets; a consumer
+  re-skins via token overrides in its ExtraCSS.
+*/ -}}
+{{ define "ui/document" -}}
+<!doctype html>
+<html lang="{{ with .Lang }}{{ . }}{{ else }}en{{ end }}"{{ with .Theme }} data-theme="{{ . }}"{{ end }}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ block "title" . }}{{ .Meta.SiteName }}{{ end }}</title>
+  <link rel="stylesheet" href="{{ .AssetBase }}/css/open-props.css{{ with .AssetVersion }}?v={{ . }}{{ end }}">
+  <link rel="stylesheet" href="{{ .AssetBase }}/css/tokens.css{{ with .AssetVersion }}?v={{ . }}{{ end }}">
+  <link rel="stylesheet" href="{{ .AssetBase }}/css/base.css{{ with .AssetVersion }}?v={{ . }}{{ end }}">
+  {{- range .ExtraCSS }}
+  <link rel="stylesheet" href="{{ . }}">
+  {{- end }}
+  {{- with .HeadTags }}
+  {{ . }}
+  {{- end }}
+  {{ template "ui/meta" .Meta }}
+  {{- with .Analytics }}
+  {{ template "ui/analytics" . }}
+  {{- end }}
+  {{- block "head" . }}{{ end }}
+</head>
+<body>
+  {{ block "nav" . }}{{ template "ui/nav" .Nav }}{{ end }}
+  <main class="app-container">
+    <div class="app-sidebar-layout{{ if .SidebarLeft }} has-left{{ end }}{{ if .SidebarRight }} has-right{{ end }}">
+      {{- with .SidebarLeft }}
+      <aside class="app-sidebar app-sidebar-left" aria-label="Navigation">{{ template "ui/sidebar" . }}</aside>
+      {{- end }}
+      <div class="app-sidebar-main">{{ block "content" . }}{{ end }}</div>
+      {{- with .SidebarRight }}
+      <aside class="app-sidebar app-sidebar-right" aria-label="Discover">{{ template "ui/sidebar" . }}</aside>
+      {{- end }}
+    </div>
+  </main>
+  {{ block "footer" . }}{{ template "ui/footer" .Footer }}{{ end }}
+</body>
+</html>
+{{- end }}

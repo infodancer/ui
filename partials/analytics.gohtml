@@ -1,0 +1,26 @@
+{{- /*
+  infodancer/ui — analytics partial (Go html/template variant)
+
+  Renders the optional web-analytics <head> scripts from a ui.Analytics (or a
+  struct with the same shape):
+    Umami     *Umami      // {Src, WebsiteID}; nil emits nothing
+    Plausible *Plausible  // {Src};            nil emits nothing
+
+  ui owns the markup; the consumer passes its own script URLs and IDs — no
+  property-specific values are baked into the toolkit. A nil member emits
+  nothing, so a consumer enables only what it uses. Place the render in <head>:
+
+    {{ template "ui/analytics" .Analytics }}
+*/ -}}
+{{ define "ui/analytics" -}}
+{{- with .Umami }}
+<script defer src="{{ .Src }}" data-website-id="{{ .WebsiteID }}"></script>
+{{- end }}
+{{- with .Plausible }}
+<script async src="{{ .Src }}"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+{{- end }}
+{{- end }}

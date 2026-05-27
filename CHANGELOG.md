@@ -6,6 +6,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.4.0 — 2026-05-27
+
+### Added
+- **Layer 2 base document template.** New `ui/document` partial (Go variant) renders a complete `<html>` page from a `DocumentData`, wiring in the Layer 1 pieces — ui CSS (open-props → tokens → base, then the consumer's `ExtraCSS`), `ui/meta`, `ui/nav`/`ui/footer`/`ui/sidebar`, the optional `ui/analytics` scripts, and htmx (surfaced through the `HeadTags` field, so htmx stays opt-in). The page body comes from template blocks the consumer defines — `content` (required), plus optional `title`, `head`, `nav`, `footer` — so a consumer that wants the full shell stops hand-rolling its own skeleton. Layer 2 is just another Layer 1 consumer; the dependency only flows Layer 2 → Layer 1. See the "Layer 1 vs Layer 2" section in [DESIGN.md](DESIGN.md) for the block contract.
+- **analytics component.** New `ui/analytics` partial + `Analytics`/`Umami`/`Plausible` types render the optional web-analytics `<head>` scripts. ui owns the markup; the consumer passes its own script URLs and IDs, and a `nil` member emits nothing. `ui/document` includes it when `Analytics` is set; it can also be rendered standalone.
+- **Hugo variants of `ui/document` and `ui/analytics` are deliberately deferred** (documented in DESIGN.md) — added when a Hugo consumer needs the full shell.
+
 ## v0.3.1 — 2026-05-25
 
 ### Added

@@ -50,11 +50,12 @@ func AssetsFS() fs.FS {
 	return sub
 }
 
-// PartialsFS returns an [fs.FS] containing the Go html/template partials
-// (`nav.gohtml`, `footer.gohtml`, `sidebar.gohtml`, `meta.gohtml`). Parse them
-// with [template.ParseFS] alongside your own templates. The partials define
-// templates `ui/nav`, `ui/footer`, `ui/sidebar`, and `ui/meta`; render via
-// `{{ template "ui/nav" .Nav }}` etc.
+// PartialsFS returns an [fs.FS] containing the Go html/template partials.
+// Parse them with [template.ParseFS] alongside your own templates. The Layer 1
+// fragment partials define `ui/nav`, `ui/footer`, `ui/sidebar`, and `ui/meta`;
+// render via `{{ template "ui/nav" .Nav }}` etc. The set also ships the Layer 2
+// `ui/document` base page skeleton (see [DocumentData]) and the `ui/analytics`
+// head-scripts partial (see [Analytics]); `ui/document` composes the others.
 func PartialsFS() fs.FS {
 	sub, err := fs.Sub(partialsRoot, "partials")
 	if err != nil {
