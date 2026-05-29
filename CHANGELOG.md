@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+### Added
+- **Gated, multilevel nav menu.** `ui/nav` grows from a flat link list into a menu that gates each item on the viewer's auth state and roles, nests into dropdowns, and supports icon affordances with live state (the notification bell). New types: `Viewer{Authenticated, EmailVerified, Roles}` (with `HasRole`); `Gate` (AND-combined `RequireAuth`/`RequireAnon`/`RequireVerified`/`RequireRoles` (+`RequireAllRoles`)/`CustomGate`); `MenuItem` (`Kind` link/icon/separator, `Children`, `Badge`); `Registry` of named custom predicates; `Badge` (count/label/state/htmx `PollURL`). `Resolve(nav, viewer, reg)` filters a configured menu to what the viewer may see — fail-closed on a missing custom gate, empty dropdowns dropped, an icon with no surviving action kept muted, separators tidied. `ParseMenu` decodes the declarative JSON config (structs also carry `yaml` tags so a YAML host unmarshals into them without ui taking a YAML dependency). Dropdowns are CSS-only via native `<details>` — no JavaScript. ui defines its own `Viewer` rather than importing `github.com/infodancer/authz`, keeping the dependency surface at the standard library; an `authz.Principal` adapts in one line. New `base.css` chrome: `.app-nav-item`, `.app-nav-dropdown`, `.app-nav-menu`, `.app-nav-sep`, `.app-nav-bell` (`--muted`), `.app-nav-badge`. Hugo variant deferred (gating is a Go-consumer capability) — same documented exception as `ui/document`.
+
+### Changed
+- **`NavData` gains `Items []MenuItem`** alongside the existing `Links`. The `ui/nav` partial renders `Items` when present and falls back to `Links` otherwise, so existing flat-nav consumers are unaffected. `NavLink` / `NavData.Links` are now deprecated in favour of `Items`.
+
 ## v0.4.0 — 2026-05-27
 
 ### Added

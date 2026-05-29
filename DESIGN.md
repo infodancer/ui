@@ -237,6 +237,62 @@ The Go partial reads these fields directly.
 
 Both variants emit the same HTML structure with class names prefixed `app-nav-*` so consumer CSS can override targeted bits without forking the partial.
 
+#### Gated, multilevel menu (`Items`)
+
+`NavData.Links` is a flat, always-visible list. `NavData.Items` is the richer form: a tree of `MenuItem`s, each carrying a visibility `Gate`, that supports dropdowns and icon affordances (the notification bell). The partial renders `Items` when present and falls back to `Links` otherwise, so a flat-nav consumer is unaffected and migrates when it wants the new capability. This is a **Go-consumer feature**: gating depends on knowing the request's viewer, which the static Hugo sites don't have. Like `ui/document`, the Hugo variant is deferred until a Hugo consumer needs it.
+
+**The resolve → render split.** Gate evaluation is *not* in the template. The host calls `ui.Resolve(cfg, viewer, registry)` to filter the configured menu down to the items the current viewer may see; the partial then renders that resolved tree and does no gating of its own. This keeps role logic out of the template (where it gets unreadable and untestable) and keeps the partial a pure presentation layer like every other.
+
+```go
+// Viewer is everything the gates need. The zero value is the anonymous
+// viewer. ui defines this rather than importing infodancer/authz so its
+// dependency surface stays at the standard library; an authz.Principal adapts
+// in one line:  ui.Viewer{Authenticated: true, EmailVerified: p.EmailVerified, Roles: p.Roles}
+type Viewer struct {
+    Authenticated bool
+    EmailVerified bool
+    Roles         []string
+}
+
+// Gate: every set field is a requirement, AND-combined. Zero Gate = always visible.
+type Gate struct {
+    RequireAuth     bool     // authenticated only
+    RequireAnon     bool     // anonymous only (e.g. "Sign in")
+    RequireVerified bool     // verified email only
+    RequireRoles    []string // any-of by default
+    RequireAllRoles bool     // flip RequireRoles to all-of
+    CustomGate      string   // key into the Registry, for rules config can't express
+}
+
+type MenuItem struct {
+    Key      string
+    Label    string
+    URL      string     // empty + Children => pure dropdown parent
+    Icon     string     // data-icon slot; consumers ship the glyph
+    Kind     string     // "" link | "icon" | "separator"
+    Gate     Gate
+    Children []MenuItem
+    Badge    *Badge     // live per-request state (set after Resolve), not config
+}
+
+type Registry map[string]func(Viewer) bool
+
+func Resolve(nav NavData, viewer Viewer, reg Registry) NavData
+```
+
+**Config.** `Items` is declarative — `ParseMenu(io.Reader)` decodes the JSON form (core, standard-library only). The structs also carry `yaml` tags so a YAML-config host unmarshals into them with its own library, which keeps `ui` from taking a YAML dependency. Functions don't serialize, so the escape-hatch predicate lives in code: config references it by name via `Gate.CustomGate`, and the host registers `name → func(Viewer) bool` in the `Registry` it passes to `Resolve`.
+
+**Gate semantics worth pinning:**
+
+- **AND-combined.** An item with `RequireAuth` *and* `RequireRoles:["admin"]` shows only to authenticated admins.
+- **Fail closed.** A `CustomGate` naming a predicate that isn't registered hides the item. A missing security gate must never default to visible.
+- **Empty-parent rule.** A dropdown parent (no own URL) whose children all gate out is *dropped*. An `icon` item that passes its own gate but has no surviving URL or children is *kept muted* — rendered inert. That asymmetry is deliberate: it's what lets the notification bell stay visible-but-inert for a signed-in viewer who lacks the role that would make it actionable.
+- **Separators tidied.** Leading, trailing, and doubled separators left by pruning are removed.
+
+**Icon menus with state.** `Kind:"icon"` renders an affordance instead of a text link. `ui` ships no glyphs (consumers own their iconography) — the mark is an empty `.app-nav-glyph[data-icon="<name>"]` for site CSS to paint. A `Badge` carries the detectable state: a count (zero collapses to nothing via `.app-nav-badge:empty`), accessible `Label`, a `data-state` render hint, and an optional htmx `PollURL` that makes the badge refresh live (`hx-get` + `hx-trigger="load, every 30s"`) over the htmx layer `ui` already ships. The bell is the canonical case — an `icon` item gated `RequireAuth`, with an admin-only child link; its unread count is a `Badge` the host attaches after `Resolve`.
+
+**Dropdowns are CSS-only.** Submenus are native `<details>`/`<summary>` — the same no-JS disclosure as `ui/sidebar`, keyboard- and screen-reader-friendly, opened on click. The `Badge`'s live poll is the only htmx in play, and it's opt-in per item.
+
 ### `footer`
 
 A small footer strip. Both variants render:
@@ -450,7 +506,7 @@ Until v1.0, consumers should pin to a specific tag and treat upgrades deliberate
 ## Open questions
 
 - **Hugo module version pinning** — how Hugo modules handle versioning across the consumer set needs a practical check during the first integration (likely sf's faq mount or osg's session-notes work).
-- **Whether `nav` and `footer` deserve more configuration knobs** in v0.1 (dropdown menus, mega-nav, footer columns). The current shape is "minimum viable"; revisit after two consumers have integrated.
+- **Whether `nav` and `footer` deserve more configuration knobs** in v0.1 (dropdown menus, mega-nav, footer columns). The current shape is "minimum viable"; revisit after two consumers have integrated. *(Partly resolved post-v0.4: `nav` gained the gated, multilevel `Items` menu with CSS-only `<details>` dropdowns and icon affordances — see "Gated, multilevel menu" above. Mega-nav and footer columns remain deferred.)*
 - **Whether handler-only modules (contact, newsletter) want a tiny `ui`-aware response template** so their success/error fragments look native instead of unstyled. Current lean: no, hosts keep owning. Reopen if a consumer asks.
 - **Print styles** — do we ship a `@media print` block in `base.css` v0.1? Probably yes, minimally — print-friendly link rendering and reasonable margins. TBD during implementation.
 
