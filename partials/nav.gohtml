@@ -6,8 +6,15 @@
     BrandURL   string         // defaults to "/" if empty
     Items      []MenuItem     // gated, multilevel menu — run through ui.Resolve first
     Links      []NavLink      // legacy flat list, rendered only when Items is empty
-    User       *NavUser       // nil = anonymous
-    SignInURL  string         // defaults to "/login" if empty
+    User       *NavUser       // legacy auth block (Links path only); nil = anonymous
+    SignInURL  string         // legacy auth block; defaults to "/login" if empty
+
+  Two modes:
+    - Items set: the full menu. Auth affordances (sign in/out, account, the
+      bell) are themselves gated Items, right-aligned past a "spacer" Item. The
+      legacy User/SignInURL auth block is NOT rendered in this mode.
+    - Items empty: the flat Links list plus the legacy User/SignInURL auth
+      block (a name span, or a "Sign in" link).
 
   The partial renders whatever it is given and does no gating of its own:
   call ui.Resolve(cfg, viewer, registry) to filter Items before rendering.
@@ -18,16 +25,17 @@
 <nav class="app-nav" aria-label="Site">
   <a class="app-nav-brand" href="{{ if .BrandURL }}{{ .BrandURL }}{{ else }}/{{ end }}">{{ .BrandText }}</a>
   {{- if .Items }}
-  <ul class="app-nav-links" role="list">
+  <ul class="app-nav-links app-nav-links--grow" role="list">
     {{- range .Items }}{{ template "ui/nav-item" . }}{{- end }}
   </ul>
-  {{- else }}{{ with .Links }}
+  {{- else }}
+  {{- with .Links }}
   <ul class="app-nav-links" role="list">
     {{- range . }}
     <li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
     {{- end }}
   </ul>
-  {{- end }}{{ end }}
+  {{- end }}
   <div class="app-nav-auth">
     {{- if .User }}
     <span class="app-nav-user">{{ .User.DisplayName }}</span>
@@ -35,18 +43,21 @@
     <a href="{{ if .SignInURL }}{{ .SignInURL }}{{ else }}/login{{ end }}">Sign in</a>
     {{- end }}
   </div>
+  {{- end }}
 </nav>
 {{- end }}
 
 {{- /*
   ui/nav-item renders a single MenuItem and recurses for submenus. Dropdowns
   are native <details> (no JavaScript, keyboard/screen-reader friendly). The
-  separator and icon kinds get their own treatment; everything else is a link
-  or a dropdown parent.
+  separator, spacer, and icon kinds get their own treatment; everything else is
+  a link or a dropdown parent. A spacer right-aligns the items that follow it.
 */ -}}
 {{ define "ui/nav-item" -}}
 {{- if eq .Kind "separator" -}}
 <li class="app-nav-sep" role="separator"></li>
+{{- else if eq .Kind "spacer" -}}
+<li class="app-nav-spacer" aria-hidden="true"></li>
 {{- else if eq .Kind "icon" -}}
 <li class="app-nav-icon">
   {{- if .Muted -}}

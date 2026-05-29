@@ -296,6 +296,18 @@ button[disabled] {
   list-style: none;
 }
 
+/* When the nav is driven by Items, the list spans the bar so a spacer can
+   right-align the auth group; the spacer eats the slack between the left and
+   right item groups. */
+.app-nav-links--grow {
+  flex: 1 1 auto;
+}
+
+.app-nav-spacer {
+  margin-inline-start: auto;
+  list-style: none;
+}
+
 .app-nav-item > a {
   color: var(--app-color-fg);
   text-decoration: none;
