@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.4.2 — 2026-05-29
+
+### Added
+- **`ui/nav` now models a complete auth-aware nav**, so a consumer can retire its hand-rolled top nav. The auth affordances (sign in/up, account, sign out, the bell) are gated `Items` — `RequireAnon` for sign in/up, `RequireAuth` for account/sign out — and a new **`KindSpacer`** (`"spacer"`) item right-aligns everything after it (flex spacer), expressing the links-left / auth-right bar from one `Items` list. `Resolve` tidies spacers (collapse consecutive, drop trailing; a leading spacer is kept). New `base.css`: `.app-nav-spacer`, `.app-nav-links--grow`.
+
+### Changed
+- **When `NavData.Items` is set, `ui/nav` no longer renders the legacy `User`/`SignInURL` auth block** — auth is expressed as gated items in that mode. The legacy auth block still renders for the flat `Links` path, so existing consumers are unaffected.
+
 ## v0.4.1 — 2026-05-29
 
 ### Added

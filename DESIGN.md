@@ -293,6 +293,8 @@ func Resolve(nav NavData, viewer Viewer, reg Registry) NavData
 
 **Dropdowns are CSS-only.** Submenus are native `<details>`/`<summary>` — the same no-JS disclosure as `ui/sidebar`, keyboard- and screen-reader-friendly, opened on click. The `Badge`'s live poll is the only htmx in play, and it's opt-in per item.
 
+**A complete auth-aware nav.** The auth affordances — sign in / sign up (anonymous), account / sign out (authenticated), the bell — are *themselves* gated `Items`, not a separate mechanism: `RequireAnon` shows sign in/up only to anonymous viewers, `RequireAuth` shows account/sign out only to authenticated ones. A `Kind:"spacer"` item right-aligns everything after it (it renders a flex spacer that eats the slack), so one `Items` list expresses the conventional links-left / auth-right bar. When `Items` is set the partial renders this full menu and does **not** render the legacy `User`/`SignInURL` auth block — that block belongs to the flat `Links` path, which is unchanged. This is what lets a consumer retire its hand-rolled, auth-aware nav entirely and just hand `ui/nav` a resolved `NavData`.
+
 ### `footer`
 
 A small footer strip. Both variants render:
