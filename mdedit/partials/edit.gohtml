@@ -1,0 +1,36 @@
+{{- /* mdedit/edit — the edit form. The textarea is the source of truth and
+       works with no JS; the client adapter (data-mdedit) enhances it in
+       place and keeps its value synced. Save/Cancel swap the wrapper back.
+       Preview, when enabled, renders server-side through the same pipeline
+       as display so what the author sees matches what gets stored. */ -}}
+{{- define "mdedit/edit" -}}
+<div class="mdedit mdedit-editing" id="mdedit-{{.ID}}">
+  <form class="mdedit-form"
+        hx-post="{{.SaveURL}}" hx-target="#mdedit-{{.ID}}" hx-swap="outerHTML">
+    {{- with .Errors}}
+    <ul class="mdedit-errors" role="alert">{{range .}}<li>{{.}}</li>{{end}}</ul>
+    {{- end}}
+    {{- if .Label}}
+    <label class="mdedit-label" for="mdedit-ta-{{.ID}}">{{.Label}}</label>
+    {{- end}}
+    <textarea id="mdedit-ta-{{.ID}}" name="markdown" class="mdedit-textarea"
+              rows="{{.Rows}}"{{if .MaxLength}} maxlength="{{.MaxLength}}"{{end}}
+              data-mdedit data-mdedit-adapter="{{.Adapter}}" data-mdedit-toolbar="{{.Toolbar}}"
+              {{- if .PreviewURL}} data-mdedit-preview-url="{{.PreviewURL}}" data-mdedit-preview-target="#mdedit-preview-{{.ID}}"{{end}}
+              {{- if .LivePreview}} data-mdedit-live="1"{{end}}>{{.Markdown}}</textarea>
+    <div class="mdedit-actions">
+      <button type="submit" class="mdedit-save">Save</button>
+      <button type="button" class="mdedit-cancel"
+              hx-get="{{.DisplayURL}}" hx-target="#mdedit-{{.ID}}" hx-swap="outerHTML">Cancel</button>
+      {{- if .PreviewURL}}
+      <button type="button" class="mdedit-preview-btn"
+              hx-post="{{.PreviewURL}}" hx-include="#mdedit-ta-{{.ID}}"
+              hx-target="#mdedit-preview-{{.ID}}" hx-swap="innerHTML">Preview</button>
+      {{- end}}
+    </div>
+  </form>
+  {{- if .PreviewURL}}
+  <div class="app-prose mdedit-preview" id="mdedit-preview-{{.ID}}"></div>
+  {{- end}}
+</div>
+{{- end -}}

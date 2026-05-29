@@ -1,0 +1,117 @@
+/*
+ * mdedit component styles.
+ *
+ * Built on infodancer/ui's --app-* design tokens so the component inherits
+ * each consumer site's palette automatically. Every var() carries a sane
+ * fallback, so the component is still legible if ui's token sheet is not
+ * loaded (degraded, not broken).
+ *
+ * This file styles the component chrome (buttons, form, preview pane) and
+ * leaves rendered Markdown to the consumer's `.app-prose` rules — mdedit
+ * does not ship prose typography, matching ui's "tokens are the API" scope.
+ */
+
+.mdedit {
+  margin-block: var(--app-space, 1rem) 0;
+}
+
+.mdedit-empty {
+  color: var(--app-color-fg-muted, #6b7280);
+  font-style: italic;
+}
+
+/* --- buttons -------------------------------------------------------- */
+
+.mdedit-edit-btn,
+.mdedit-save,
+.mdedit-cancel,
+.mdedit-preview-btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--app-radius-sm, 4px);
+  padding: var(--app-space-xs, 0.25rem) var(--app-space-sm, 0.5rem);
+  border: 1px solid var(--app-color-border, #d1d5db);
+  background: var(--app-color-bg-raised, #f9fafb);
+  color: var(--app-color-fg, #111827);
+}
+
+.mdedit-save {
+  border-color: var(--app-color-accent, #2563eb);
+  background: var(--app-color-accent, #2563eb);
+  color: var(--app-color-accent-on, #fff);
+}
+
+.mdedit-save:hover {
+  background: var(--app-color-accent-hover, #1d4ed8);
+}
+
+.mdedit-edit-btn:hover,
+.mdedit-cancel:hover,
+.mdedit-preview-btn:hover {
+  border-color: var(--app-color-accent, #2563eb);
+}
+
+/* --- edit form ------------------------------------------------------ */
+
+.mdedit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-sm, 0.5rem);
+}
+
+.mdedit-label {
+  font-weight: 600;
+}
+
+.mdedit-textarea {
+  font-family: var(--app-font-mono, ui-monospace, monospace);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mdedit-actions {
+  display: flex;
+  gap: var(--app-space-sm, 0.5rem);
+  flex-wrap: wrap;
+}
+
+.mdedit-errors {
+  margin: 0;
+  padding-left: var(--app-space, 1rem);
+  color: var(--app-color-danger, #b91c1c);
+}
+
+/* --- preview pane --------------------------------------------------- */
+
+.mdedit-preview {
+  margin-top: var(--app-space, 1rem);
+  padding: var(--app-space, 1rem);
+  border: 1px dashed var(--app-color-border, #d1d5db);
+  border-radius: var(--app-radius, 6px);
+  background: var(--app-color-bg, #fff);
+}
+
+.mdedit-preview:empty {
+  display: none;
+}
+
+/* --- EasyMDE: align its chrome with the tokens ---------------------- */
+
+.mdedit-editing .EasyMDEContainer .editor-toolbar {
+  border-top-left-radius: var(--app-radius-sm, 4px);
+  border-top-right-radius: var(--app-radius-sm, 4px);
+  border-color: var(--app-color-border, #d1d5db);
+}
+
+.mdedit-editing .EasyMDEContainer .editor-toolbar button {
+  color: var(--app-color-fg, #111827);
+  font-weight: 600;
+}
+
+.mdedit-editing .EasyMDEContainer .CodeMirror {
+  border-color: var(--app-color-border, #d1d5db);
+  border-bottom-left-radius: var(--app-radius-sm, 4px);
+  border-bottom-right-radius: var(--app-radius-sm, 4px);
+  color: var(--app-color-fg, #111827);
+  background: var(--app-color-bg, #fff);
+}

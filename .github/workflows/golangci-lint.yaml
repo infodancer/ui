@@ -13,12 +13,20 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    env:
+      GOWORK: "off"
+    strategy:
+      matrix:
+        module: [".", "markdown", "mdedit"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
         with:
-          go-version: stable
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+          go-version-file: ${{ matrix.module }}/go.mod
+
+      - name: golangci-lint (${{ matrix.module }})
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.10.1
+          working-directory: ${{ matrix.module }}
