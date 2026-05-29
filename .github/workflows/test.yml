@@ -13,10 +13,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Each module builds against its own go.mod (the repo go.work is a local-dev
+    # convenience only); the spike example resolves its siblings via replace.
+    env:
+      GOWORK: "off"
+    strategy:
+      matrix:
+        module: [".", "markdown", "mdedit", "mdedit/examples/spike"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
         with:
-          go-version: stable
-      - name: Run tests
+          go-version-file: ${{ matrix.module }}/go.mod
+
+      - name: Test ${{ matrix.module }}
+        working-directory: ${{ matrix.module }}
         run: go test -race -count=1 ./...
