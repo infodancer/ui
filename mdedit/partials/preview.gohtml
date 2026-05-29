@@ -1,0 +1,6 @@
+{{- /* mdedit/preview — server-rendered preview body, swapped into the
+       preview pane. Identical pipeline to display, so the preview is an
+       honest picture of what Save will store, not a client approximation. */ -}}
+{{- define "mdedit/preview" -}}
+{{- if .HTML}}{{.HTML}}{{else}}<p class="mdedit-empty">Nothing to preview.</p>{{end -}}
+{{- end -}}

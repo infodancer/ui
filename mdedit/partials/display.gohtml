@@ -1,0 +1,13 @@
+{{- /* mdedit/display — rendered HTML plus an Edit button. The button
+       swaps this whole wrapper for the edit form via htmx. */ -}}
+{{- define "mdedit/display" -}}
+<div class="mdedit" id="mdedit-{{.ID}}" data-mdedit-display>
+  <div class="app-prose mdedit-rendered">
+    {{- if .HTML}}{{.HTML}}{{else}}<p class="mdedit-empty">Nothing here yet.</p>{{end -}}
+  </div>
+  {{- if .EditURL}}
+  <button type="button" class="mdedit-edit-btn"
+          hx-get="{{.EditURL}}" hx-target="#mdedit-{{.ID}}" hx-swap="outerHTML">Edit</button>
+  {{- end}}
+</div>
+{{- end -}}
