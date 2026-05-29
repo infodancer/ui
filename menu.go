@@ -104,6 +104,7 @@ const (
 	KindLink      = ""          // a link, or a dropdown parent when it has children
 	KindIcon      = "icon"      // an icon affordance (e.g. the notification bell)
 	KindSeparator = "separator" // a visual divider within a dropdown; carries no link
+	KindSpacer    = "spacer"    // a flex spacer; pushes the items after it to the right
 )
 
 // MenuItem is one entry in a menu (see [NavData.Items]). An item with Children
@@ -163,7 +164,9 @@ type Registry map[string]func(Viewer) bool
 //     surviving children is kept with Muted set: the affordance renders inert.
 //     This is the notification bell a signed-in non-admin sees.
 //   - Separators that end up leading, trailing, or doubled after pruning are
-//     removed, so a divider never dangles around gated-out neighbours.
+//     removed, so a divider never dangles around gated-out neighbours. Spacers
+//     are collapsed when consecutive and dropped when trailing (a leading
+//     spacer — everything right-aligned — is kept).
 //
 // Resolve never mutates nav or its items.
 func Resolve(nav NavData, viewer Viewer, reg Registry) NavData {
@@ -182,7 +185,7 @@ func resolveItems(items []MenuItem, v Viewer, reg Registry) []MenuItem {
 			continue
 		}
 		it.Children = resolveItems(it.Children, v, reg)
-		if it.Kind != KindSeparator && it.URL == "" && len(it.Children) == 0 {
+		if !isStructural(it.Kind) && it.URL == "" && len(it.Children) == 0 {
 			if it.Kind == KindIcon {
 				it.Muted = true
 			} else {
@@ -191,20 +194,35 @@ func resolveItems(items []MenuItem, v Viewer, reg Registry) []MenuItem {
 		}
 		out = append(out, it)
 	}
-	return tidySeparators(out)
+	return tidyStructural(out)
 }
 
-// tidySeparators drops leading and consecutive separators and trims a trailing
-// one, so pruning the items around a divider can't leave it dangling.
-func tidySeparators(items []MenuItem) []MenuItem {
+// isStructural reports whether a kind is a contentless layout element
+// (separator, spacer) rather than something that needs a link or children.
+func isStructural(kind string) bool {
+	return kind == KindSeparator || kind == KindSpacer
+}
+
+// tidyStructural cleans up the contentless layout items left by gating:
+// separators dropped when leading, trailing, or doubled (a divider needs
+// content on both sides); spacers collapsed when consecutive and dropped when
+// trailing (a leading spacer right-aligns everything and is kept).
+func tidyStructural(items []MenuItem) []MenuItem {
 	out := make([]MenuItem, 0, len(items))
 	for _, it := range items {
-		if it.Kind == KindSeparator && (len(out) == 0 || out[len(out)-1].Kind == KindSeparator) {
-			continue
+		switch it.Kind {
+		case KindSeparator:
+			if len(out) == 0 || out[len(out)-1].Kind == KindSeparator {
+				continue
+			}
+		case KindSpacer:
+			if len(out) > 0 && out[len(out)-1].Kind == KindSpacer {
+				continue
+			}
 		}
 		out = append(out, it)
 	}
-	for len(out) > 0 && out[len(out)-1].Kind == KindSeparator {
+	for len(out) > 0 && isStructural(out[len(out)-1].Kind) {
 		out = out[:len(out)-1]
 	}
 	if len(out) == 0 {

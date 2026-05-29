@@ -331,6 +331,75 @@ func TestNav_ItemsTakePrecedenceOverLinks(t *testing.T) {
 	}
 }
 
+func TestResolve_TidiesSpacers(t *testing.T) {
+	t.Parallel()
+
+	sp := ui.MenuItem{Kind: ui.KindSpacer}
+	nav := ui.NavData{Items: []ui.MenuItem{
+		sp, // leading spacer -> kept (right-aligns everything after)
+		{Key: "a", Label: "A", URL: "/a"},
+		sp,
+		sp, // consecutive -> collapsed to one
+		{Key: "b", Label: "B", URL: "/b"},
+		sp, // trailing -> dropped
+	}}
+	got := ui.Resolve(nav, ui.Viewer{}, nil).Items
+	// Expect: spacer, a, spacer, b
+	if len(got) != 4 ||
+		got[0].Kind != ui.KindSpacer || got[1].Key != "a" ||
+		got[2].Kind != ui.KindSpacer || got[3].Key != "b" {
+		t.Errorf("spacer tidy failed: %v", describe(got))
+	}
+}
+
+func TestNav_RendersSpacer(t *testing.T) {
+	t.Parallel()
+	out := renderNav(t, ui.NavData{Items: []ui.MenuItem{
+		{Key: "a", Label: "A", URL: "/a"},
+		{Kind: ui.KindSpacer},
+		{Key: "b", Label: "B", URL: "/b"},
+	}})
+	if !strings.Contains(out, `class="app-nav-spacer"`) {
+		t.Errorf("spacer should render\n%s", out)
+	}
+	if !strings.Contains(out, "app-nav-links--grow") {
+		t.Errorf("Items list should carry the --grow modifier so the spacer can right-align\n%s", out)
+	}
+}
+
+func TestNav_ItemsSuppressLegacyAuthBlock(t *testing.T) {
+	t.Parallel()
+	// In Items mode the auth affordances are gated items; the legacy
+	// User/SignInURL auth block must not also render (it would duplicate or
+	// contradict the items).
+	out := renderNav(t, ui.NavData{
+		Items: []ui.MenuItem{{Key: "signout", Label: "Sign out", URL: "/logout"}},
+		User:  &ui.NavUser{DisplayName: "alice"},
+	})
+	if strings.Contains(out, "app-nav-user") || strings.Contains(out, ">Sign in<") {
+		t.Errorf("Items mode must not render the legacy auth block\n--- got ---\n%s", out)
+	}
+	if !strings.Contains(out, ">Sign out<") {
+		t.Errorf("the auth item should render\n%s", out)
+	}
+}
+
+func TestNav_LegacyAuthBlockStillRenders(t *testing.T) {
+	t.Parallel()
+	// With no Items, the flat Links path keeps the legacy auth block.
+	authed := renderNav(t, ui.NavData{
+		Links: []ui.NavLink{{Label: "Browse", URL: "/browse"}},
+		User:  &ui.NavUser{DisplayName: "alice"},
+	})
+	if !strings.Contains(authed, `class="app-nav-user"`) || !strings.Contains(authed, "alice") {
+		t.Errorf("legacy path should render the user span\n%s", authed)
+	}
+	anon := renderNav(t, ui.NavData{Links: []ui.NavLink{{Label: "Browse", URL: "/browse"}}})
+	if !strings.Contains(anon, ">Sign in<") {
+		t.Errorf("legacy path should render the Sign in link when anonymous\n%s", anon)
+	}
+}
+
 // --- Config round-trip ------------------------------------------------------
 
 func TestParseMenu_JSON(t *testing.T) {
