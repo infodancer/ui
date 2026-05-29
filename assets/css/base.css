@@ -286,6 +286,111 @@ button[disabled] {
   color: var(--app-color-fg-muted);
 }
 
+/* Menu items: links, native <details> dropdowns, icon affordances. The nav
+   partial renders pre-gated items (see ui.Resolve); these are presentation
+   only. Dropdowns need no JavaScript — <details>/<summary> is the disclosure. */
+
+.app-nav-item,
+.app-nav-icon {
+  position: relative;
+  list-style: none;
+}
+
+.app-nav-item > a {
+  color: var(--app-color-fg);
+  text-decoration: none;
+}
+
+.app-nav-item > a:hover {
+  color: var(--app-color-accent);
+}
+
+.app-nav-dropdown > summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--app-color-fg);
+}
+
+.app-nav-dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-nav-dropdown > summary:hover {
+  color: var(--app-color-accent);
+}
+
+.app-nav-menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--app-space-xs));
+  inset-inline-start: 0;
+  z-index: 50;
+  min-width: 12rem;
+  margin: 0;
+  padding: var(--app-space-xs) 0;
+  list-style: none;
+  background-color: var(--app-color-bg-raised);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.app-nav-menu a {
+  display: block;
+  padding: var(--app-space-xs) var(--app-space-sm);
+  color: var(--app-color-fg);
+  text-decoration: none;
+}
+
+.app-nav-menu a:hover {
+  color: var(--app-color-accent);
+}
+
+.app-nav-sep {
+  height: 1px;
+  margin: var(--app-space-xs) 0;
+  background-color: var(--app-color-border);
+}
+
+/* Icon affordances (e.g. the notification bell). The glyph itself is the
+   consumer's: ui emits an empty .app-nav-glyph[data-icon] for site CSS to
+   paint. A muted icon is shown but inert (a signed-in viewer without the role
+   that would make it actionable). */
+
+.app-nav-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--app-color-fg);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.app-nav-bell:hover,
+.app-nav-dropdown > summary.app-nav-bell:hover {
+  color: var(--app-color-accent);
+}
+
+.app-nav-bell--muted {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.app-nav-badge {
+  display: inline-block;
+  min-width: 1.25em;
+  padding: 0 0.35em;
+  border-radius: var(--app-radius-pill);
+  background-color: var(--app-color-accent);
+  color: var(--app-color-accent-on);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* A zero-count badge renders empty markup and collapses to nothing. */
+.app-nav-badge:empty {
+  display: none;
+}
+
 /* --- Footer ----------------------------------------------------------- */
 
 .app-footer {

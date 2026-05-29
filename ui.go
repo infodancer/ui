@@ -67,15 +67,29 @@ func PartialsFS() fs.FS {
 // NavData is the documented data shape for the `ui/nav` partial. Any
 // struct with the same fields works (html/template duck-types by name);
 // this type is provided as a convenience.
+//
+// Two ways to supply the primary links, checked in this order by the partial:
+//
+//   - Items — the gated, multilevel menu (dropdowns, role/auth gates, icon
+//     items such as the notification bell). Run the configured menu through
+//     [Resolve] with the request's [Viewer] first; the partial renders the
+//     items it's given and does no gating of its own.
+//   - Links — the legacy flat link list, rendered only when Items is empty.
+//     Retained for consumers not yet migrated to Items; prefer Items for new
+//     work.
 type NavData struct {
 	BrandText string
-	BrandURL  string // defaults to "/" when empty
-	Links     []NavLink
-	User      *NavUser // nil renders the sign-in link
-	SignInURL string   // defaults to "/login" when empty
+	BrandURL  string     // defaults to "/" when empty
+	Items     []MenuItem // gated, multilevel menu; see Resolve
+	Links     []NavLink  // Deprecated: legacy flat list; use Items. Rendered only when Items is empty.
+	User      *NavUser   // nil renders the sign-in link
+	SignInURL string     // defaults to "/login" when empty
 }
 
 // NavLink is a primary nav link.
+//
+// Deprecated: NavLink backs the flat [NavData.Links] list. New consumers use
+// [MenuItem] via [NavData.Items], which adds gating, dropdowns, and icon items.
 type NavLink struct {
 	Label string
 	URL   string
