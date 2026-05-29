@@ -83,6 +83,9 @@ func TestBaseCSS_HasAllUtilityClasses(t *testing.T) {
 		".app-danger", ".app-success",
 		// Chrome
 		".app-nav", ".app-nav-brand", ".app-nav-links",
+		// Menu items: dropdowns, separators, icon affordances
+		".app-nav-item", ".app-nav-dropdown", ".app-nav-menu",
+		".app-nav-sep", ".app-nav-bell", ".app-nav-bell--muted", ".app-nav-badge",
 		".app-footer", ".app-footer-brand", ".app-footer-links",
 		// List chrome
 		".app-list-header", ".app-list-sorts", ".app-list-empty",

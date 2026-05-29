@@ -4,22 +4,30 @@
   Expects a ui.NavData (or a struct with the same shape):
     BrandText  string
     BrandURL   string         // defaults to "/" if empty
-    Links      []NavLink      // each {Label, URL}
+    Items      []MenuItem     // gated, multilevel menu — run through ui.Resolve first
+    Links      []NavLink      // legacy flat list, rendered only when Items is empty
     User       *NavUser       // nil = anonymous
     SignInURL  string         // defaults to "/login" if empty
+
+  The partial renders whatever it is given and does no gating of its own:
+  call ui.Resolve(cfg, viewer, registry) to filter Items before rendering.
 
   Render via: {{ template "ui/nav" .Nav }}
 */ -}}
 {{ define "ui/nav" -}}
 <nav class="app-nav" aria-label="Site">
   <a class="app-nav-brand" href="{{ if .BrandURL }}{{ .BrandURL }}{{ else }}/{{ end }}">{{ .BrandText }}</a>
-  {{- with .Links }}
+  {{- if .Items }}
+  <ul class="app-nav-links" role="list">
+    {{- range .Items }}{{ template "ui/nav-item" . }}{{- end }}
+  </ul>
+  {{- else }}{{ with .Links }}
   <ul class="app-nav-links" role="list">
     {{- range . }}
-    <li><a href="{{ .URL }}">{{ .Label }}</a></li>
+    <li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
     {{- end }}
   </ul>
-  {{- end }}
+  {{- end }}{{ end }}
   <div class="app-nav-auth">
     {{- if .User }}
     <span class="app-nav-user">{{ .User.DisplayName }}</span>
@@ -28,4 +36,57 @@
     {{- end }}
   </div>
 </nav>
+{{- end }}
+
+{{- /*
+  ui/nav-item renders a single MenuItem and recurses for submenus. Dropdowns
+  are native <details> (no JavaScript, keyboard/screen-reader friendly). The
+  separator and icon kinds get their own treatment; everything else is a link
+  or a dropdown parent.
+*/ -}}
+{{ define "ui/nav-item" -}}
+{{- if eq .Kind "separator" -}}
+<li class="app-nav-sep" role="separator"></li>
+{{- else if eq .Kind "icon" -}}
+<li class="app-nav-icon">
+  {{- if .Muted -}}
+  <span class="app-nav-bell app-nav-bell--muted"{{ with .Badge }}{{ if .Label }} aria-label="{{ .Label }}"{{ end }}{{ end }}>{{ template "ui/nav-glyph" . }}</span>
+  {{- else if .Children -}}
+  <details class="app-nav-dropdown">
+    <summary class="app-nav-bell"{{ with .Badge }}{{ if .Label }} aria-label="{{ .Label }}"{{ end }}{{ end }}>{{ template "ui/nav-glyph" . }}</summary>
+    <ul class="app-nav-menu" role="list">
+      {{- range .Children }}{{ template "ui/nav-item" . }}{{- end }}
+    </ul>
+  </details>
+  {{- else -}}
+  <a class="app-nav-bell" href="{{ .URL }}"{{ with .Badge }}{{ if .Label }} aria-label="{{ .Label }}"{{ end }}{{ end }}>{{ template "ui/nav-glyph" . }}</a>
+  {{- end -}}
+</li>
+{{- else if .Children -}}
+<li class="app-nav-item">
+  <details class="app-nav-dropdown">
+    <summary>{{ .Label }}</summary>
+    <ul class="app-nav-menu" role="list">
+      {{- if .URL }}
+      <li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
+      {{- end }}
+      {{- range .Children }}{{ template "ui/nav-item" . }}{{- end }}
+    </ul>
+  </details>
+</li>
+{{- else -}}
+<li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
+{{- end -}}
+{{- end }}
+
+{{- /*
+  ui/nav-glyph renders the icon mark and its optional live badge. ui ships no
+  icon glyphs (consumers own their iconography): the mark is an empty element
+  carrying data-icon="<name>" for the consumer's CSS to paint. The badge
+  collapses to nothing when its count is zero (.app-nav-badge:empty), and polls
+  via htmx when a PollURL is set.
+*/ -}}
+{{ define "ui/nav-glyph" -}}
+{{- if .Icon }}<span class="app-nav-glyph" data-icon="{{ .Icon }}" aria-hidden="true"></span>{{ end -}}
+{{- with .Badge }}<span class="app-nav-badge"{{ if .PollURL }} hx-get="{{ .PollURL }}" hx-trigger="load, every 30s"{{ end }}{{ if .State }} data-state="{{ .State }}"{{ end }}>{{ if gt .Count 0 }}{{ .Count }}{{ end }}</span>{{ end -}}
 {{- end }}
