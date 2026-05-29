@@ -28,7 +28,7 @@ func TestHTMXAssetEmbeddedAndServable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.Close()
+	_ = f.Close()
 	if len(body) == 0 {
 		t.Fatal("htmx asset is empty")
 	}
@@ -52,7 +52,7 @@ func TestHTMXAssetEmbeddedAndServable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("serving htmx asset: status %d, want 200", resp.StatusCode)
 	}
