@@ -36,6 +36,23 @@ The package is deliberately small. v0.1 ships **design tokens** (CSS custom prop
 - A build pipeline. CSS ships as-is; no preprocessor, no PostCSS, no bundling.
 - Internationalization. The handful of literal strings the partials emit (currently just `"Sign in"`) are English-only. Consumers needing translations fork the partials; we don't ship an i18n surface or a string catalog.
 
+## Repository structure — nested modules
+
+This document describes the **root `ui` module**. Since the 2026-05-29
+consolidation the repository also hosts two sibling Go modules with their own
+`go.mod`, tags, and design docs:
+
+- `markdown/` — `github.com/infodancer/ui/markdown`, the audited goldmark +
+  bluemonday sanitizer (the portfolio's single sanitization boundary). Design
+  lives in [markdown/README.md](markdown/README.md).
+- `mdedit/` — `github.com/infodancer/ui/mdedit`, the Markdown display/edit
+  component that renders through `markdown`. Design lives in
+  [mdedit/DESIGN.md](mdedit/DESIGN.md).
+
+They share a repository for coordinated versioning and CI but keep no Go
+dependency on the root `ui` module; only mdedit's example imports both
+siblings. Everything below concerns the root token/CSS/partials library.
+
 ## The two-consumer model
 
 A consumer that wants to use `infodancer/ui` falls into one of two categories:

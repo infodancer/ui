@@ -6,6 +6,20 @@ Shared design tokens, base CSS, and `nav` / `footer` partials for the [infodance
 
 > Maintained as a personal utility for sites and modules in the portfolio. Issues and PRs welcome but response times vary. See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
+## Modules in this repository
+
+This repo is a small monorepo of three independently-tagged Go modules that
+share the portfolio's front-end concerns. They have no Go dependency on each
+other (only the mdedit example imports both siblings):
+
+| Module | Path | What it is |
+|--------|------|-----------|
+| **ui** (root) | `github.com/infodancer/ui` | Design tokens, base CSS, and `nav`/`footer`/`sidebar`/`meta` partials (Hugo + Go variants), plus vendored htmx. Tokens are the public API. |
+| **markdown** | `github.com/infodancer/ui/markdown` | The one audited Markdown → sanitized-HTML pipeline (goldmark + bluemonday). See [markdown/README.md](markdown/README.md). |
+| **mdedit** | `github.com/infodancer/ui/mdedit` | A Markdown display/edit component (Go partials + vendored editor JS behind an adapter seam) that renders through `markdown`. See [mdedit/README.md](mdedit/README.md). |
+
+The rest of this README covers the root **ui** module.
+
 ## What it is
 
 A small CSS + template library:
@@ -14,7 +28,7 @@ A small CSS + template library:
 - **Base stylesheet** — a minimal reset plus sensible defaults for typography, lists, links, code, basic form elements. ~150 lines.
 - **`nav`, `footer`, `sidebar`, and `meta` partials** — chrome (nav strip, footer, collapsible sidebar) plus the SEO/social `<head>` tags (`meta`), shipped in **parallel Hugo and Go variants** producing identical output but each idiomatic to its host engine.
 
-What it deliberately is *not*: a component framework, a JS toolkit, an icon set, or a build pipeline. See [DESIGN.md](DESIGN.md) for scope rationale.
+The root module deliberately is *not*: a component framework, a JS toolkit, an icon set, or a build pipeline. See [DESIGN.md](DESIGN.md) for scope rationale. (Client-side JavaScript does live in the repo — vendored htmx here and the vendored editor in `mdedit` — just not as part of the root token/CSS library.)
 
 ## Design
 
