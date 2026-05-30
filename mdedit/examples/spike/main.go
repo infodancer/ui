@@ -63,22 +63,24 @@ type region struct {
 	toolbar  string
 	rows     int
 	maxLen   int
+	loadFile bool // offer the "Load file…" control (long-form only)
 }
 
 func (rg *region) field() mdedit.Field {
 	return mdedit.Field{
-		ID:          rg.id,
-		Markdown:    rg.doc.get(),
-		HTML:        rg.renderer.Render(rg.doc.get()),
-		DisplayURL:  rg.base,
-		EditURL:     rg.base + "/edit",
-		SaveURL:     rg.base + "/save",
-		PreviewURL:  rg.base + "/preview",
-		LivePreview: true,
-		Label:       rg.label,
-		Toolbar:     rg.toolbar,
-		Rows:        rg.rows,
-		MaxLength:   rg.maxLen,
+		ID:            rg.id,
+		Markdown:      rg.doc.get(),
+		HTML:          rg.renderer.Render(rg.doc.get()),
+		DisplayURL:    rg.base,
+		EditURL:       rg.base + "/edit",
+		SaveURL:       rg.base + "/save",
+		PreviewURL:    rg.base + "/preview",
+		LivePreview:   true,
+		Label:         rg.label,
+		Toolbar:       rg.toolbar,
+		Rows:          rg.rows,
+		MaxLength:     rg.maxLen,
+		AllowFileLoad: rg.loadFile,
 	}.WithDefaults()
 }
 
@@ -130,7 +132,7 @@ func main() {
 	document := &region{
 		tpl: tpl, renderer: markdown.New(markdown.Rich()), doc: &doc{md: docSeed},
 		base: "/doc", id: "doc", label: "Document body (Markdown)",
-		toolbar: "full", rows: 14, maxLen: 30000,
+		toolbar: "full", rows: 14, maxLen: 30000, loadFile: true,
 	}
 	comment := &region{
 		tpl: tpl, renderer: markdown.New(markdown.Comment(markdown.LinkRelativeOnly)), doc: &doc{md: commentSeed},

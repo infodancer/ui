@@ -27,6 +27,16 @@
               hx-post="{{.PreviewURL}}" hx-include="#mdedit-ta-{{.ID}}"
               hx-target="#mdedit-preview-{{.ID}}" hx-swap="innerHTML">Preview</button>
       {{- end}}
+      {{- if .AllowFileLoad}}
+      {{- /* Loads a local file into the textarea as if typed; the loader
+             (mdedit.js) reads it client-side and never uploads it. Text only —
+             image upload is a separate concern. */ -}}
+      <label class="mdedit-load">Load file…
+        <input type="file" class="mdedit-load-input"
+               accept=".md,.markdown,text/markdown,text/plain"
+               data-mdedit-load="mdedit-ta-{{.ID}}">
+      </label>
+      {{- end}}
     </div>
   </form>
   {{- if .PreviewURL}}
