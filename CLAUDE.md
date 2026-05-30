@@ -4,9 +4,26 @@ Guidance for Claude Code sessions in `github.com/infodancer/ui`.
 
 ## What this repo is
 
-A small CSS + template library: design tokens, a base stylesheet, and `nav`/`footer` partials shipped in parallel Hugo and Go html/template variants. Consumed by feature modules (faq, planned blog, timeline) and consumer sites in the infodancer/matthewjhunter portfolio. See [DESIGN.md](DESIGN.md) for the design proposal, scope, and rationale.
+A small monorepo of three independently-tagged Go modules for the
+infodancer/matthewjhunter portfolio's front end. The **root `ui` module** is a
+CSS + template library: design tokens, a base stylesheet, and
+`nav`/`footer`/`sidebar`/`meta` partials shipped in parallel Hugo and Go
+html/template variants, plus vendored htmx. Two **nested modules** live
+alongside it, each with its own `go.mod`, tag, `DESIGN`/`README`/`CLAUDE`, and
+guidance:
 
-This is **not** a component framework or a comprehensive design system. It's deliberately small: the tokens are the public API, and components are extracted from feature modules only when duplication forces it.
+- `markdown/` — `github.com/infodancer/ui/markdown`, the audited goldmark +
+  bluemonday sanitizer. See [markdown/CLAUDE.md](markdown/CLAUDE.md).
+- `mdedit/` — `github.com/infodancer/ui/mdedit`, the Markdown editor component
+  (Go partials + vendored editor JS). See [mdedit/CLAUDE.md](mdedit/CLAUDE.md).
+
+When working inside a nested module, `cd` into it and follow its CLAUDE.md. The
+guidance below covers the **root `ui` module** specifically. See
+[DESIGN.md](DESIGN.md) for the design proposal, scope, and rationale.
+
+The root module is **not** a component framework or a comprehensive design
+system. It's deliberately small: the tokens are the public API, and components
+are extracted from feature modules only when duplication forces it.
 
 ## What NOT to change without explicit approval
 
@@ -21,7 +38,7 @@ This is **not** a component framework or a comprehensive design system. It's del
 - Go version: track the latest patched release per the infodancer org standard. See [CONTRIBUTING.md](CONTRIBUTING.md).
 - CSS: hand-written, no preprocessor, no bundler. Two files: `tokens.css` and `base.css`.
 - Comments in CSS describe *why* a rule exists, not *what* it does. Token names already communicate purpose.
-- No JS. The library is HTML + CSS. Interactivity is the consumer's problem.
+- No JS *authored* in the root module — it is HTML + CSS, and interactivity is the consumer's problem. (The root module does vendor htmx as an opt-in asset; the `mdedit` nested module vendors an editor. Authoring new client JS belongs in a feature module, not here.)
 
 ## Two-consumer integration
 
