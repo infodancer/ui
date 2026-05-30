@@ -69,6 +69,11 @@
       getValue: function () {
         return editor.value();
       },
+      setValue: function (text) {
+        // Replaces the buffer (file load). EasyMDE mirrors this back into the
+        // underlying textarea, keeping it authoritative for Save/Preview.
+        editor.value(text);
+      },
       sync: function () {
         // EasyMDE keeps the original textarea updated, but flush explicitly
         // so a request never races a pending CodeMirror change.

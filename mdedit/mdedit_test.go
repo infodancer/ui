@@ -143,6 +143,33 @@ func TestWithDefaults(t *testing.T) {
 	}
 }
 
+func TestEdit_AllowFileLoadRendersInput(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "post", SaveURL: "/s", DisplayURL: "/d", AllowFileLoad: true}.WithDefaults()
+	out := render(t, tpl, "mdedit/edit", f)
+	for _, want := range []string{
+		`type="file"`,
+		`data-mdedit-load="mdedit-ta-post"`,               // wires to this field's textarea
+		`accept=".md,.markdown,text/markdown,text/plain"`, // text only, no image upload here
+		"mdedit-load",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("AllowFileLoad edit missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+func TestEdit_NoFileLoadByDefault(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "post", SaveURL: "/s", DisplayURL: "/d"}.WithDefaults()
+	out := render(t, tpl, "mdedit/edit", f)
+	for _, absent := range []string{`type="file"`, "data-mdedit-load", "mdedit-load"} {
+		if strings.Contains(out, absent) {
+			t.Errorf("default (AllowFileLoad false) should omit %q, got:\n%s", absent, out)
+		}
+	}
+}
+
 func TestEdit_ToolbarProfileRenders(t *testing.T) {
 	tpl := parseAll(t)
 	f := Field{ID: "c", SaveURL: "/s", DisplayURL: "/d", Toolbar: "standard"}.WithDefaults()

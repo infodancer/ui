@@ -81,6 +81,22 @@
   color: var(--app-color-danger, #b91c1c);
 }
 
+/* "Load file…" control: a label wrapping a file input, aligned with the
+   action buttons. The native input is left as-is (cross-browser file pickers
+   resist styling); the label just sits in the action row. */
+.mdedit-load {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-xs, 0.25rem);
+  font: inherit;
+  color: var(--app-color-fg-muted, #6b7280);
+}
+
+.mdedit-load-input {
+  font: inherit;
+  max-width: 14rem;
+}
+
 /* --- preview pane --------------------------------------------------- */
 
 .mdedit-preview {

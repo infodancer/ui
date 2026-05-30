@@ -139,6 +139,15 @@ type Field struct {
 	// button-triggered only. Requires PreviewURL.
 	LivePreview bool
 
+	// AllowFileLoad adds a control that lets the author load a local Markdown
+	// file into the editor, as if they had typed it. The file is read in the
+	// browser and dropped into the textarea — it never leaves the client
+	// except via the normal Save POST, so it adds no server attack surface
+	// and goes through the same render/sanitize path as typed Markdown.
+	// Loading replaces the current content (with a confirm if it is
+	// non-empty). Off by default; enable it for long-form pages, not comments.
+	AllowFileLoad bool
+
 	Errors []string // validation messages shown above the edit form
 }
 
