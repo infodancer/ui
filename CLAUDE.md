@@ -38,7 +38,7 @@ are extracted from feature modules only when duplication forces it.
 - Go version: track the latest patched release per the infodancer org standard. See [CONTRIBUTING.md](CONTRIBUTING.md).
 - CSS: hand-written, no preprocessor, no bundler. Two files: `tokens.css` and `base.css`.
 - Comments in CSS describe *why* a rule exists, not *what* it does. Token names already communicate purpose.
-- No JS *authored* in the root module — it is HTML + CSS, and interactivity is the consumer's problem. (The root module does vendor htmx as an opt-in asset; the `mdedit` nested module vendors an editor. Authoring new client JS belongs in a feature module, not here.)
+- **Minimal authored JS is allowed in the root module, but only for small, opt-in, cross-cutting *mechanism*** — the kind every consumer would otherwise re-implement identically, with no per-site logic baked in. The action tracker (`track.js`, served via `AssetsFS`, emitted by `TrackerHead`) is the reference example: ~60 lines, framework-agnostic, declarative `data-track` attributes, vocabulary owned by the consumer. Substantial or component-level interactivity (editors, widgets, anything stateful or opinionated) still belongs in a feature module (see `mdedit`) or the consumer — *"interactivity is the consumer's problem"* remains the default. Vendored third-party JS (htmx) stays opt-in via `HeadTags`. When in doubt, keep it out of root.
 
 ## Two-consumer integration
 

@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+### Added
+- **Action tracker** — a small authored asset (`assets/js/track.js`) plus `TrackerHead(staticBase)` that emits its `<script>` tag, the JS companion to the `ui/analytics` partial. It turns declarative `data-track="event"` attributes into the analytics vendor's custom events via one delegated submit/click listener; `data-track-*` attributes become event properties (e.g. `data-track-category="ai"` → `{category:"ai"}`). ui owns the mechanism; the consumer owns the vocabulary. Umami is wired today, with a marked extension point for Plausible. Kept separate from `HeadTags` (htmx) so it's opt-in independently of the interactivity stack; no SRI (a first-party, same-origin asset). This **softens the prior "no authored JS in root" rule** to permit minimal, opt-in, cross-cutting mechanism — see CLAUDE.md.
+
 ## v0.4.2 — 2026-05-29
 
 ### Added
