@@ -49,8 +49,10 @@ are candidate adapters. See `assets/mdedit.js` for the contract and
 
 EasyMDE is configured deliberately: its bundled client preview is **disabled**
 (the server is the only renderer), and it never fetches an icon font from a CDN
-(`autoDownloadFontAwesome: false`). The vendored files are pinned and
-SRI-hashed — see `assets/vendor/PROVENANCE.md`.
+(`autoDownloadFontAwesome: false`). Toolbar buttons render inline SVG glyphs
+(Tabler Icons, MIT) embedded in the adapter — no icon font, no network. The
+vendored EasyMDE files are pinned and SRI-hashed — see
+`assets/vendor/PROVENANCE.md`.
 
 ## Loading a local file
 

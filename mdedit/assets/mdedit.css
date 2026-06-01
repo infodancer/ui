@@ -124,6 +124,14 @@
   font-weight: 600;
 }
 
+/* Buttons carry an inline SVG (stroke="currentColor") instead of an icon
+   font; size it to the button and let it inherit the color above. */
+.mdedit-editing .EasyMDEContainer .editor-toolbar button svg {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
 .mdedit-editing .EasyMDEContainer .CodeMirror {
   border-color: var(--app-color-border, #d1d5db);
   border-bottom-left-radius: var(--app-radius-sm, 4px);
