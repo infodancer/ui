@@ -170,6 +170,24 @@ func TestEdit_NoFileLoadByDefault(t *testing.T) {
 	}
 }
 
+func TestEdit_UploadURLWiresAttribute(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "note", SaveURL: "/s", DisplayURL: "/d", UploadURL: "/campaign/x/notes/image"}.WithDefaults()
+	out := render(t, tpl, "mdedit/edit", f)
+	if !strings.Contains(out, `data-mdedit-upload="/campaign/x/notes/image"`) {
+		t.Errorf("UploadURL should wire data-mdedit-upload, got:\n%s", out)
+	}
+}
+
+func TestEdit_NoUploadByDefault(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "note", SaveURL: "/s", DisplayURL: "/d"}.WithDefaults()
+	out := render(t, tpl, "mdedit/edit", f)
+	if strings.Contains(out, "data-mdedit-upload") {
+		t.Errorf("no UploadURL should omit data-mdedit-upload, got:\n%s", out)
+	}
+}
+
 func TestEdit_ToolbarProfileRenders(t *testing.T) {
 	tpl := parseAll(t)
 	f := Field{ID: "c", SaveURL: "/s", DisplayURL: "/d", Toolbar: "standard"}.WithDefaults()

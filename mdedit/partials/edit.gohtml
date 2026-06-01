@@ -17,6 +17,7 @@
               rows="{{.Rows}}"{{if .MaxLength}} maxlength="{{.MaxLength}}"{{end}}
               data-mdedit data-mdedit-adapter="{{.Adapter}}" data-mdedit-toolbar="{{.Toolbar}}"
               {{- if .PreviewURL}} data-mdedit-preview-url="{{.PreviewURL}}" data-mdedit-preview-target="#mdedit-preview-{{.ID}}"{{end}}
+              {{- if .UploadURL}} data-mdedit-upload="{{.UploadURL}}"{{end}}
               {{- if .LivePreview}} data-mdedit-live="1"{{end}}>{{.Markdown}}</textarea>
     <div class="mdedit-actions">
       <button type="submit" class="mdedit-save">Save</button>

@@ -85,8 +85,40 @@
     full: [btn.bold, btn.italic, btn.strikethrough, btn.heading, "|", btn.quote, btn.ul, btn.ol, "|", btn.link, btn.code, btn.image, "|", btn.table, btn.hr],
   };
 
+  // Upload an image to the host endpoint and hand EasyMDE back the URL it
+  // should insert. EasyMDE calls this for drag-drop, paste, and the browse
+  // dialog when uploadImage is on. The endpoint owns auth, validation, and
+  // re-encoding (see Field.UploadURL); we only POST multipart "image",
+  // same-origin, and read {url} / {error} from the JSON reply.
+  function makeUploadFn(url) {
+    return function (file, onSuccess, onError) {
+      var form = new FormData();
+      form.append("image", file);
+      fetch(url, {
+        method: "POST",
+        body: form,
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      })
+        .then(function (resp) {
+          return resp
+            .json()
+            .catch(function () {
+              return {};
+            })
+            .then(function (body) {
+              if (resp.ok && body && body.url) onSuccess(body.url);
+              else onError((body && body.error) || "Image upload failed.");
+            });
+        })
+        .catch(function () {
+          onError("Image upload failed.");
+        });
+    };
+  }
+
   expose("easymde", function (textarea, opts) {
-    var editor = new EasyMDE({
+    var config = {
       element: textarea,
       autoDownloadFontAwesome: false,
       toolbar: profiles[opts.toolbar] || profiles.full,
@@ -97,7 +129,15 @@
       previewRender: function () {
         return "Preview is rendered by the server.";
       },
-    });
+    };
+    // Inline image upload (drag-drop / paste / browse) when the host wired an
+    // endpoint. uploadImage turns the feature on; imageUploadFunction routes
+    // the bytes to that endpoint instead of EasyMDE's own URL-based default.
+    if (opts.uploadURL) {
+      config.uploadImage = true;
+      config.imageUploadFunction = makeUploadFn(opts.uploadURL);
+    }
+    var editor = new EasyMDE(config);
 
     return {
       getValue: function () {

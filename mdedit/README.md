@@ -61,9 +61,21 @@ Set `Field.AllowFileLoad` to add a "Load file…" control that loads a local
 the browser and dropped into the textarea — it is **never uploaded**; it rides
 the normal Save POST and goes through the same `markdown` sanitization as typed
 content, so it adds no server attack surface. Off by default; enable it for
-long-form pages, not comments. Image upload is a separate, deferred concern
-(see [DESIGN.md](DESIGN.md) and
-[infodancer/ui#14](https://github.com/infodancer/ui/issues/14)).
+long-form pages, not comments.
+
+## Image upload
+
+Set `Field.UploadURL` to opt the editor into inline image upload: the author
+can drag-drop, paste, or browse for an image and the adapter POSTs it
+(multipart field `image`) to that URL, then inserts the returned link at the
+cursor. Empty (the default) leaves the image button as plain link-insertion.
+
+The endpoint is the **host's**, not the module's. It must authenticate the
+request, authorize the write against the owning record, validate and re-encode
+the bytes, and respond 2xx with JSON `{"url":"…"}` (or non-2xx with
+`{"error":"…"}`). The module ships no upload endpoint and assumes nothing about
+the URL beyond a same-origin POST — pair it with a host upload handler (e.g.
+`infodancer/web/media`) that owns those obligations.
 
 ## Try it
 
