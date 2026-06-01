@@ -4,3 +4,7 @@
 *.out
 coverage.txt
 .DS_Store
+# Local dev workspace — must not ship in the module zip (it leaks into
+# consumers' vendor dirs and can disturb downstream workspace resolution).
+/go.work
+/go.work.sum

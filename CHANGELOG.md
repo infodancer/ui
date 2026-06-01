@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.4.4 — 2026-06-01
+
+### Fixed
+- **`go.work` no longer ships in the module zip.** The local dev-workspace file was tracked, so it landed in consumers' vendor trees (e.g. `vendor/github.com/infodancer/ui/go.work`) on `go mod vendor` and could disturb downstream workspace resolution. It is now git-ignored and untracked (the working copy stays for local development).
+
 ## v0.4.3 — 2026-06-01
 
 ### Added
