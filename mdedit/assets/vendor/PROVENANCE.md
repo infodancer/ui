@@ -32,3 +32,21 @@ Verify a local copy:
 ```
 openssl dgst -sha384 -binary easymde.min.js | openssl base64 -A
 ```
+
+## Tabler Icons 1.x
+
+Source: https://github.com/tabler/tabler-icons (MIT, © Paweł Kuna)
+
+The toolbar button glyphs are inline SVG path data, not a vendored file —
+they are embedded directly in `assets/adapters/easymde.js` (the `icons`
+map) so the editor ships no icon font and makes no network request. The
+path data was taken from the outline set:
+
+```
+curl -fsSL https://raw.githubusercontent.com/tabler/tabler-icons/main/icons/outline/<name>.svg
+```
+
+Glyphs used (button → Tabler name): bold→bold, italic→italic,
+strikethrough→strikethrough, heading→heading, quote→blockquote,
+unordered-list→list, ordered-list→list-numbers, link→link, code→code,
+image→photo, table→table, horizontal-rule→line-dashed.
