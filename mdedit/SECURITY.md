@@ -41,8 +41,12 @@ Do not open public issues for security problems.
 - **Boundaries this module does not own.** Authentication, authorization, and
   CSRF protection on the Save/Preview endpoints are the host application's
   responsibility. `mdedit` renders and sanitizes; it does not decide who may
-  edit. Image upload (when added) is likewise a host concern — see
-  [DESIGN.md](DESIGN.md) for the contract and the host's security obligations.
+  edit. Image upload is likewise a host concern: when `Field.UploadURL` is set
+  the adapter only POSTs the chosen image, same-origin, to that URL. The
+  endpoint must authenticate, authorize against the owning record, enforce
+  size/type limits, and re-encode the bytes; the module ships no upload
+  endpoint and makes no trust assumptions about the URL. See
+  [DESIGN.md](DESIGN.md) for the contract.
 
 - **Output contract.** Only the sanitized output of a `markdown.Renderer` may be
   cast to `template.HTML` for user-authored fields. The `Field.HTML` shown in

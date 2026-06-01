@@ -148,6 +148,18 @@ type Field struct {
 	// non-empty). Off by default; enable it for long-form pages, not comments.
 	AllowFileLoad bool
 
+	// UploadURL opts the editor into inline image upload: drag-drop or paste
+	// an image and the adapter POSTs it (multipart field "image") to this URL,
+	// then inserts the returned image link at the cursor. Empty (the default)
+	// leaves the image button as plain link-insertion with no upload.
+	//
+	// The endpoint is the host's, not the module's: it MUST authenticate the
+	// request, authorize the write against the owning record, validate and
+	// re-encode the bytes, and respond 2xx with JSON {"url":"…"} (or a non-2xx
+	// with {"error":"…"}). The module ships no upload endpoint and makes no
+	// trust assumptions about this URL beyond same-origin POST.
+	UploadURL string
+
 	Errors []string // validation messages shown above the edit form
 }
 

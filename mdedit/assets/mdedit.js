@@ -12,7 +12,8 @@
  *
  *   mount(textarea, opts) -> controller
  *
- *   opts = { livePreview: bool, toolbar: "minimal"|"standard"|"full" }
+ *   opts = { livePreview: bool, toolbar: "minimal"|"standard"|"full",
+ *            uploadURL: string }  // uploadURL "" disables image upload
  *   controller = {
  *     getValue(): string        // current editor content
  *     setValue(text): void      // replace editor content (used by file load)
@@ -151,7 +152,12 @@
     }
     var live = ta.getAttribute("data-mdedit-live") === "1";
     var toolbar = ta.getAttribute("data-mdedit-toolbar") || "full";
-    var controller = mount(ta, { livePreview: live, toolbar: toolbar });
+    var uploadURL = ta.getAttribute("data-mdedit-upload") || "";
+    var controller = mount(ta, {
+      livePreview: live,
+      toolbar: toolbar,
+      uploadURL: uploadURL,
+    });
     ta._mdeditController = controller;
 
     if (live && controller.onChange) {
