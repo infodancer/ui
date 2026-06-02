@@ -171,6 +171,7 @@ type Meta struct {
 	Type        string          // og:type; defaults "website"
 	Image       string          // absolute URL; og:image + twitter:image
 	Locale      string          // og:locale (e.g. "en_US")
+	Robots      string          // <meta name="robots">; e.g. "noindex,follow" (empty emits nothing)
 	JSONLD      []template.HTML // complete <script> elements; build with [JSONLD]
 }
 

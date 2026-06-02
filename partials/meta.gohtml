@@ -10,6 +10,7 @@
     Type        string          // og:type; defaults "website"
     Image       string          // absolute URL; og:image + twitter:image
     Locale      string          // og:locale
+    Robots      string          // <meta name="robots"> (e.g. "noindex,follow")
     JSONLD      []template.HTML // complete <script> elements (build with ui.JSONLD)
 
   Every field is optional: an empty field emits nothing. og:type falls back to
@@ -29,6 +30,9 @@
 {{- end }}
 {{- with .Canonical }}
 <link rel="canonical" href="{{ . }}">
+{{- end }}
+{{- with .Robots }}
+<meta name="robots" content="{{ . }}">
 {{- end }}
 <meta property="og:type" content="{{ with .Type }}{{ . }}{{ else }}website{{ end }}">
 {{- with .Title }}

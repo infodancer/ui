@@ -413,6 +413,7 @@ func TestMeta_RendersTags(t *testing.T) {
 		Type:        "article",
 		Image:       "https://example.org/img.webp",
 		Locale:      "en_US",
+		Robots:      "noindex,follow",
 		JSONLD:      []template.HTML{ld},
 	}
 	var buf bytes.Buffer
@@ -430,6 +431,7 @@ func TestMeta_RendersTags(t *testing.T) {
 		`<meta property="og:site_name" content="Example">`,
 		`<meta property="og:image" content="https://example.org/img.webp">`,
 		`<meta property="og:locale" content="en_US">`,
+		`<meta name="robots" content="noindex,follow">`,
 		`<meta name="twitter:card" content="summary_large_image">`,
 		`<meta name="twitter:title" content="Session 1">`,
 		`<meta name="twitter:image" content="https://example.org/img.webp">`,
@@ -458,6 +460,7 @@ func TestMeta_EmptyOmits(t *testing.T) {
 		`rel="canonical"`,
 		`property="og:image"`,
 		`property="og:title"`,
+		`name="robots"`,
 		`application/ld+json`,
 	} {
 		if strings.Contains(out, absent) {
