@@ -187,6 +187,24 @@ func TestField_NoFileLoadOrUploadByDefault(t *testing.T) {
 	}
 }
 
+func TestField_RequiredRendersAttribute(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "x", Name: "b", Required: true}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	if !strings.Contains(out, " required") {
+		t.Errorf("Required should render the required attribute, got:\n%s", out)
+	}
+}
+
+func TestField_NotRequiredByDefault(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "x", Name: "b"}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	if strings.Contains(out, " required") {
+		t.Errorf("default field should omit required, got:\n%s", out)
+	}
+}
+
 func TestField_MarkdownIsEscapedInTextarea(t *testing.T) {
 	tpl := parseAll(t)
 	f := Field{ID: "x", Name: "b", Markdown: "</textarea><script>alert(1)</script>"}.WithDefaults()

@@ -17,7 +17,7 @@
   <label class="mdedit-label" for="mdedit-ta-{{.ID}}">{{.Label}}</label>
   {{- end}}
   <textarea id="mdedit-ta-{{.ID}}" name="{{.Name}}" class="mdedit-textarea"
-            rows="{{.Rows}}"{{if .MaxLength}} maxlength="{{.MaxLength}}"{{end}}
+            rows="{{.Rows}}"{{if .MaxLength}} maxlength="{{.MaxLength}}"{{end}}{{if .Required}} required{{end}}
             data-mdedit data-mdedit-adapter="{{.Adapter}}" data-mdedit-toolbar="{{.Toolbar}}"
             {{- if .UploadURL}} data-mdedit-upload="{{.UploadURL}}"{{end}}>{{.Markdown}}</textarea>
   {{- if .AllowFileLoad}}
