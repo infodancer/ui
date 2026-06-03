@@ -16,7 +16,7 @@ func parseAll(t *testing.T) *template.Template {
 	if err != nil {
 		t.Fatalf("ParseFS: %v", err)
 	}
-	for _, name := range []string{"mdedit/display", "mdedit/edit", "mdedit/preview"} {
+	for _, name := range []string{"mdedit/display", "mdedit/edit", "mdedit/preview", "mdedit/field"} {
 		if tpl.Lookup(name) == nil {
 			t.Fatalf("partial %q not defined", name)
 		}
@@ -110,6 +110,92 @@ func TestEdit_MarkdownIsEscapedInTextarea(t *testing.T) {
 	}
 }
 
+func TestField_WiresSeamUnderHostName(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{
+		ID:        "note-body",
+		Name:      "body_md",
+		Markdown:  "# hi",
+		Label:     "Body",
+		Rows:      14,
+		MaxLength: 5000,
+	}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+
+	for _, want := range []string{
+		`id="mdedit-note-body"`,
+		`class="mdedit mdedit-editing"`, // wrapper carries the editor chrome
+		`id="mdedit-ta-note-body"`,
+		`name="body_md"`, // serializes under the host-chosen name, not "markdown"
+		`for="mdedit-ta-note-body"`,
+		`data-mdedit`, `data-mdedit-adapter="easymde"`, `data-mdedit-toolbar="full"`,
+		`rows="14"`, `maxlength="5000"`,
+		`# hi`, // markdown round-trips into the textarea
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("field missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+func TestField_HasNoInlineLifecycle(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "x", Name: "body", SaveURL: "/s", DisplayURL: "/d", PreviewURL: "/p"}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	// A form field is not the inline editor: no <form>, no Save/Cancel/Preview,
+	// no htmx. The host's form owns submission and any preview.
+	for _, absent := range []string{"<form", "hx-post", "hx-get", "mdedit-save", "mdedit-cancel", "mdedit-preview-btn"} {
+		if strings.Contains(out, absent) {
+			t.Errorf("field should omit lifecycle chrome %q, got:\n%s", absent, out)
+		}
+	}
+}
+
+func TestField_NameDefaultsToMarkdown(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "x"}.WithDefaults() // no Name set
+	out := render(t, tpl, "mdedit/field", f)
+	if !strings.Contains(out, `name="markdown"`) {
+		t.Errorf("unset Name should default to markdown, got:\n%s", out)
+	}
+}
+
+func TestField_AllowFileLoadAndUpload(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "note", Name: "body_md", AllowFileLoad: true, UploadURL: "/up"}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	for _, want := range []string{
+		`type="file"`,
+		`data-mdedit-load="mdedit-ta-note"`,
+		`accept=".md,.markdown,text/markdown,text/plain"`,
+		`data-mdedit-upload="/up"`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("field with file load + upload missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+func TestField_NoFileLoadOrUploadByDefault(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "note", Name: "body_md"}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	for _, absent := range []string{`type="file"`, "data-mdedit-load", "data-mdedit-upload"} {
+		if strings.Contains(out, absent) {
+			t.Errorf("default field should omit %q, got:\n%s", absent, out)
+		}
+	}
+}
+
+func TestField_MarkdownIsEscapedInTextarea(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{ID: "x", Name: "b", Markdown: "</textarea><script>alert(1)</script>"}.WithDefaults()
+	out := render(t, tpl, "mdedit/field", f)
+	if strings.Contains(out, "<script>alert(1)</script>") {
+		t.Errorf("textarea content must be HTML-escaped, got:\n%s", out)
+	}
+}
+
 func TestHeadTags_EmitsPinnedSRI(t *testing.T) {
 	out := string(HeadTags("/static/mdedit/"))
 	for _, want := range []string{
@@ -140,6 +226,9 @@ func TestWithDefaults(t *testing.T) {
 	}
 	if f.Toolbar != "full" {
 		t.Errorf("default toolbar = %q, want full", f.Toolbar)
+	}
+	if f.Name != "markdown" {
+		t.Errorf("default name = %q, want markdown", f.Name)
 	}
 }
 

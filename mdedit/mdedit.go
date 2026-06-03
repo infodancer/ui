@@ -6,7 +6,8 @@
 //   - [AssetsFS] — the client assets (a vendored editor, the adapter seam,
 //     the loader, and token-styled CSS) to mount under a static path.
 //   - [PartialsFS] — Go html/template partials defining `mdedit/display`,
-//     `mdedit/edit`, and `mdedit/preview`, parsed alongside host templates.
+//     `mdedit/edit`, `mdedit/preview`, and `mdedit/field`, parsed alongside
+//     host templates.
 //   - [Field] — the data shape those partials render.
 //
 // The component owns the display↔edit↔save↔preview UI loop and the client
@@ -59,8 +60,10 @@ func AssetsFS() fs.FS {
 
 // PartialsFS returns an [fs.FS] of the Go html/template partials. Parse them
 // with [template.ParseFS] alongside your own templates; they define
-// `mdedit/display`, `mdedit/edit`, and `mdedit/preview`, each rendered
-// against a [Field].
+// `mdedit/display`, `mdedit/edit`, `mdedit/preview`, and `mdedit/field`, each
+// rendered against a [Field]. Use `mdedit/edit` for the inline htmx
+// display↔edit lifecycle and `mdedit/field` for a plain editor embedded in the
+// host's own form.
 func PartialsFS() fs.FS {
 	sub, err := fs.Sub(partialsRoot, "partials")
 	if err != nil {
@@ -115,6 +118,14 @@ type Field struct {
 	Rows      int    // textarea rows; defaults to 12 when zero
 	MaxLength int    // textarea maxlength; omitted when zero
 
+	// Name is the form field name the textarea serializes under. It matters
+	// only for `mdedit/field`, the partial that embeds the editor in the host's
+	// own <form>: the host picks the name so the value lands in its expected
+	// POST field. The inline `mdedit/edit` lifecycle ignores it — that textarea
+	// always posts as "markdown" to its own SaveURL. Empty defaults to
+	// "markdown".
+	Name string
+
 	// Adapter names the client editor to mount ("easymde" is the only one
 	// registered today). Empty defaults to "easymde". This is the seam:
 	// swapping editors is a data change, not a template change.
@@ -164,8 +175,8 @@ type Field struct {
 }
 
 // WithDefaults returns a copy of f with zero-valued display fields filled
-// in (Adapter "easymde", Toolbar "full", Rows 12). Handlers can call it
-// before rendering so templates stay free of default logic.
+// in (Adapter "easymde", Toolbar "full", Rows 12, Name "markdown"). Handlers
+// can call it before rendering so templates stay free of default logic.
 func (f Field) WithDefaults() Field {
 	if f.Adapter == "" {
 		f.Adapter = "easymde"
@@ -175,6 +186,9 @@ func (f Field) WithDefaults() Field {
 	}
 	if f.Rows == 0 {
 		f.Rows = 12
+	}
+	if f.Name == "" {
+		f.Name = "markdown"
 	}
 	return f
 }

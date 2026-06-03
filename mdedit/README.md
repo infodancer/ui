@@ -23,7 +23,7 @@ import "github.com/infodancer/ui/markdown" // the render/sanitize pipeline
 | Piece | What it is |
 |-------|-----------|
 | `AssetsFS()` | Client assets: a vendored, SRI-pinned editor (EasyMDE), the adapter seam, the loader, and token-styled CSS. Mount under a static path. |
-| `PartialsFS()` | Go `html/template` partials: `mdedit/display`, `mdedit/edit`, `mdedit/preview`. |
+| `PartialsFS()` | Go `html/template` partials: `mdedit/display`, `mdedit/edit`, `mdedit/preview` (the inline htmx lifecycle), and `mdedit/field` (a plain editor field for the host's own form). |
 | `Field` | The data shape those partials render — current Markdown, rendered HTML, and the four loop URLs. |
 | `HeadTags(base)` | The `<link>`/`<script>` tags (with SRI) for your page `<head>`. |
 
