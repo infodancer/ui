@@ -89,7 +89,8 @@ type LinkDecision struct {
 }
 
 // Options configures a [Renderer]. The zero value is CommonMark parsed with
-// no raw HTML, sanitized against bluemonday's UGCPolicy — i.e. [Strict].
+// no raw HTML and no footnotes, sanitized against bluemonday's UGCPolicy;
+// [Strict] is that plus footnotes.
 //
 // There are two allowlist bases. The default base is UGCPolicy: permissive,
 // for authored content you mostly trust (headings, images, tables, links).
@@ -103,6 +104,16 @@ type Options struct {
 	Strikethrough bool // GFM ~~deleted~~ → <del>
 	Autolink      bool // GFM: turn bare URLs into links
 	TaskList      bool // GFM task-list checkboxes
+
+	// Footnotes enables Markdown footnotes (`text[^id]` with `[^id]: note`).
+	// It turns on goldmark's footnote extension AND allowlists the markup it
+	// emits — the two must move together, so this is one flag rather than an
+	// Extensions/PolicyCustomize pair callers would have to wire by hand.
+	// goldmark renders footnote ids from the note's numeric index, never the
+	// author's [^id] label text, so the allowlisted id/href/class/role values
+	// are a closed set (see allowFootnotes). On in the authored presets
+	// (Strict/Rich); deliberately off for the untrusted Comment subset.
+	Footnotes bool
 
 	// AllowRawHTML sets goldmark's WithUnsafe, letting raw HTML in the
 	// source pass goldmark untouched so bluemonday can filter it. Enable
@@ -165,9 +176,11 @@ type Options struct {
 	StripEmptyDivs bool
 }
 
-// Strict returns options for plain authored Markdown: CommonMark, no raw
-// HTML, UGCPolicy allowlist. Matches osg's historical render behavior.
-func Strict() Options { return Options{} }
+// Strict returns options for plain authored Markdown: CommonMark plus
+// footnotes, no raw HTML, UGCPolicy allowlist. (Footnotes are the one
+// extension on by default here — authored prose, e.g. osg's session reports,
+// relies on them; everything else stays CommonMark.)
+func Strict() Options { return Options{Footnotes: true} }
 
 // Rich returns options for full authored content (faq's needs): GFM
 // extensions, raw inline HTML passthrough (filtered by bluemonday), the
@@ -179,6 +192,7 @@ func Rich() Options {
 		Autolink:       true,
 		TaskList:       true,
 		AllowRawHTML:   true,
+		Footnotes:      true,
 		ExtraElements:  []string{"kbd", "sub", "sup", "mark"},
 		StripEmptyDivs: true,
 	}
@@ -226,6 +240,9 @@ func New(opts Options) *Renderer {
 	}
 	if opts.TaskList {
 		exts = append(exts, extension.TaskList)
+	}
+	if opts.Footnotes {
+		exts = append(exts, extension.Footnote)
 	}
 	if len(opts.Directives) > 0 {
 		exts = append(exts, &directiveExtension{funcs: opts.Directives})
@@ -279,11 +296,56 @@ func buildPolicy(opts Options) *bluemonday.Policy {
 	if len(opts.ExtraElements) > 0 {
 		p.AllowElements(opts.ExtraElements...)
 	}
+	if opts.Footnotes {
+		allowFootnotes(p)
+	}
 	applyLinkPolicy(p, opts.Links)
 	if opts.PolicyCustomize != nil {
 		opts.PolicyCustomize(p)
 	}
 	return p
+}
+
+// Footnote markup is a closed set: goldmark renders ids from the note's numeric
+// index (strconv.Itoa), so fnref:N / fnrefK:N (references, K = a repeat ref's
+// index) and fn:N (notes) are the only id shapes, and the anchors are same-page
+// fragments to them. The author's [^label] text is a parse-time key only and
+// never reaches the HTML, so these patterns can be tight.
+var (
+	footnoteIDPattern   = regexp.MustCompile(`^(fn|fnref[0-9]*):[0-9]+$`)
+	footnoteHrefPattern = regexp.MustCompile(`^#(fn|fnref[0-9]*):[0-9]+$`)
+	footnoteClass       = regexp.MustCompile(`^footnote-(ref|backref)$`)
+	footnoteRefRole     = regexp.MustCompile(`^doc-(noteref|backlink)$`)
+	footnotesClass      = regexp.MustCompile(`^footnotes$`)
+	footnotesRole       = regexp.MustCompile(`^doc-endnotes$`)
+	footnoteNoteRole    = regexp.MustCompile(`^doc-endnote$`)
+)
+
+// allowFootnotes allowlists exactly the markup goldmark's footnote extension
+// emits, constrained to its numeric-index shapes (see the patterns above):
+//
+//	in text:  <sup id="fnref:N"><a href="#fn:N" class="footnote-ref" role="doc-noteref">N</a></sup>
+//	at end:   <div class="footnotes" role="doc-endnotes"><hr><ol>
+//	            <li id="fn:N" role="doc-endnote"><p> …note… <a href="#fnref:N" class="footnote-backref" role="doc-backlink">↩</a></p></li>
+//	          </ol></div>
+//
+// The note body is ordinary inline content sanitized by the rest of the policy.
+// The href Matching rule pins the anchors to #fn:N / #fnref:N fragments — it is
+// belt-and-suspenders on the UGCPolicy base (which already permits relative
+// hrefs) but is what keeps footnote anchors clickable should Footnotes ever be
+// paired with a Restrictive base. It never widens hrefs: the general href rule
+// still runs, and the scheme allowlist plus goldmark's IsDangerousURL reject
+// javascript:/data: regardless. Enabled only on the authored presets (Strict /
+// Rich), never on the untrusted Comment subset.
+func allowFootnotes(p *bluemonday.Policy) {
+	p.AllowElements("sup", "div", "ol", "li", "hr", "p", "a")
+	p.AllowAttrs("id").Matching(footnoteIDPattern).OnElements("sup", "li")
+	p.AllowAttrs("href").Matching(footnoteHrefPattern).OnElements("a")
+	p.AllowAttrs("class").Matching(footnoteClass).OnElements("a")
+	p.AllowAttrs("role").Matching(footnoteRefRole).OnElements("a")
+	p.AllowAttrs("class").Matching(footnotesClass).OnElements("div")
+	p.AllowAttrs("role").Matching(footnotesRole).OnElements("div")
+	p.AllowAttrs("role").Matching(footnoteNoteRole).OnElements("li")
 }
 
 // applyLinkPolicy configures href handling on p per lp. LinkDefault leaves the

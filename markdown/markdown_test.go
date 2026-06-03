@@ -30,6 +30,11 @@ var xssCorpus = []struct {
 	{"style tag", `<style>body{display:none}</style>`, []string{"<style"}},
 	{"svg onload", `<svg onload="alert(1)"></svg>`, []string{"onload", "alert(1)"}},
 	{"meta refresh", `<meta http-equiv="refresh" content="0;url=evil">`, []string{"<meta"}},
+	// A footnote body is ordinary inline content; a scripted body must not yield
+	// a live <script> under any preset (footnotes off in Comment, on in
+	// Strict/Rich). Inert escaped text is harmless, as for the plain script case
+	// above — TestFootnotes_BodySanitizedUnderRich covers the live-element path.
+	{"footnote body script", "ref[^a]\n\n[^a]: <script>alert(1)</script>", []string{"<script"}},
 }
 
 func TestPresets_XSSCorpusNeutralized(t *testing.T) {
@@ -89,6 +94,73 @@ func TestRich_EnablesGFMAndInlineHTML(t *testing.T) {
 	kbd := r.RenderString("Press <kbd>Ctrl</kbd>")
 	if !strings.Contains(kbd, "<kbd>Ctrl</kbd>") {
 		t.Errorf("Rich should preserve <kbd>, got:\n%s", kbd)
+	}
+}
+
+func TestFootnotes_RenderedUnderAuthoredPresets(t *testing.T) {
+	const in = "He kept walking north.[^toll]\n\n[^toll]: The forage was poisoned, and the healing found no purchase."
+	for _, preset := range []struct {
+		name string
+		r    *Renderer
+	}{{"Strict", New(Strict())}, {"Rich", New(Rich())}} {
+		t.Run(preset.name, func(t *testing.T) {
+			got := preset.r.RenderString(in)
+			// Reference marker in the prose, and the notes block at the end,
+			// with goldmark's numeric-index ids/anchors preserved.
+			for _, want := range []string{
+				`<sup id="fnref:1">`,
+				`href="#fn:1"`,
+				`class="footnote-ref"`,
+				`role="doc-noteref"`,
+				`<div class="footnotes"`,
+				`role="doc-endnotes"`,
+				`<li id="fn:1"`,
+				`class="footnote-backref"`,
+				`href="#fnref:1"`,
+				"The forage was poisoned",
+			} {
+				if !strings.Contains(got, want) {
+					t.Errorf("expected %q in footnote output, got:\n%s", want, got)
+				}
+			}
+		})
+	}
+}
+
+func TestFootnotes_BodySanitizedUnderRich(t *testing.T) {
+	// Rich enables WithUnsafe, so raw HTML inside a footnote body becomes real
+	// elements — bluemonday must still strip event handlers and dangerous
+	// schemes there. (The #fn:N anchor allowlist must not become a bypass for
+	// arbitrary hrefs.)
+	r := New(Rich())
+	in := "see[^h]\n\n[^h]: <img src=q onerror=alert(1)> and a [trap](javascript:alert(2)) and [ok](#fn:1)"
+	got := r.RenderString(in)
+	for _, bad := range []string{"onerror", "javascript:", "alert(1)", "alert(2)"} {
+		if strings.Contains(got, bad) {
+			t.Errorf("footnote body leaked %q, got:\n%s", bad, got)
+		}
+	}
+	// The footnote still rendered as a footnote (not swallowed by the failure).
+	if !strings.Contains(got, `<div class="footnotes"`) {
+		t.Errorf("expected the note to still render, got:\n%s", got)
+	}
+}
+
+func TestFootnotes_OffForUntrustedAndZeroValue(t *testing.T) {
+	const in = "ref[^x]\n\n[^x]: a note"
+	for _, preset := range []struct {
+		name string
+		r    *Renderer
+	}{
+		{"Comment", New(Comment(LinkRelativeOnly))},
+		{"zero-value", New(Options{})},
+	} {
+		t.Run(preset.name, func(t *testing.T) {
+			got := preset.r.RenderString(in)
+			if strings.Contains(got, `id="fnref:`) || strings.Contains(got, `class="footnotes"`) {
+				t.Errorf("%s must not emit footnote markup, got:\n%s", preset.name, got)
+			}
+		})
 	}
 }
 
