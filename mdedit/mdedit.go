@@ -126,6 +126,12 @@ type Field struct {
 	// "markdown".
 	Name string
 
+	// Required marks the textarea `required` so the browser blocks submit of an
+	// empty value. It applies only to `mdedit/field` (a field in the host's own
+	// form); the inline `mdedit/edit` lifecycle has its own Save flow and
+	// ignores it. The host still validates server-side regardless.
+	Required bool
+
 	// Adapter names the client editor to mount ("easymde" is the only one
 	// registered today). Empty defaults to "easymde". This is the seam:
 	// swapping editors is a data change, not a template change.
