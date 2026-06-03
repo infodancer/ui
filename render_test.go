@@ -1,6 +1,7 @@
 package ui_test
 
 import (
+	"html/template"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -55,6 +56,53 @@ func TestRenderError_WrapsBodyInChrome(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("body missing %q\n---\n%s", want, body)
 		}
+	}
+}
+
+// RenderDocument wraps an arbitrary (trusted) body in the document chrome.
+func TestRenderDocument_WrapsBodyInChrome(t *testing.T) {
+	rec := httptest.NewRecorder()
+	err := ui.RenderDocument(rec, ui.DocumentPage{
+		DocumentData: ui.DocumentData{
+			AssetBase: "/static/ui",
+			Meta:      ui.Meta{SiteName: "Example"},
+			Nav:       ui.NavData{Items: []ui.MenuItem{{Key: "c", Label: "Campaigns", URL: "/campaign/"}}},
+			Footer:    ui.FooterData{Links: []ui.FooterLink{{Label: "Contribute", URL: "/contribute/"}}},
+		},
+		Title: "Verify your email",
+		Body:  template.HTML(`<p>Please <a href="/account/">verify</a> first.</p>`),
+	})
+	if err != nil {
+		t.Fatalf("RenderDocument: %v", err)
+	}
+	if rec.Code != 200 { // Status 0 defaults to 200
+		t.Errorf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{
+		"<!doctype html>",
+		"<title>Verify your email · Example</title>",
+		`<p>Please <a href="/account/">verify</a> first.</p>`, // body passes through unescaped
+		`href="/campaign/"`,   // nav chrome
+		`href="/contribute/"`, // footer chrome
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body missing %q\n---\n%s", want, body)
+		}
+	}
+}
+
+// An explicit status is honored.
+func TestRenderDocument_HonorsStatus(t *testing.T) {
+	rec := httptest.NewRecorder()
+	_ = ui.RenderDocument(rec, ui.DocumentPage{
+		DocumentData: ui.DocumentData{Meta: ui.Meta{SiteName: "S"}},
+		Status:       403,
+		Title:        "Forbidden",
+		Body:         template.HTML("<p>no</p>"),
+	})
+	if rec.Code != 403 {
+		t.Errorf("status = %d, want 403", rec.Code)
 	}
 }
 

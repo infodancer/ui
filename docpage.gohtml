@@ -1,0 +1,20 @@
+{{- /*
+  docpage.gohtml — the blocks RenderDocument / RenderError fill into ui/document.
+  Parsed into the private pageTmpl set (not the partials FS a consumer parses),
+  so these definitions can't leak into a consumer's page templates.
+
+    title      <title> text: "Title · SiteName", or SiteName when Title is empty.
+    content    the content column: the caller's Body (template.HTML, trusted).
+    errorbody  RenderError's standard body — an escaped title heading + message,
+               in ui's own app-* classes — composed and passed back in as Body.
+*/ -}}
+{{ define "title" -}}
+{{ if .Title }}{{ .Title }}{{ with .Meta.SiteName }} · {{ . }}{{ end }}{{ else }}{{ .Meta.SiteName }}{{ end }}
+{{- end }}
+{{ define "content" }}{{ .Body }}{{ end }}
+{{ define "errorbody" -}}
+<header class="app-page-header"><h1>{{ .Title }}</h1></header>
+<section class="app-section app-prose">
+  <p>{{ .Message }}</p>
+</section>
+{{- end }}
