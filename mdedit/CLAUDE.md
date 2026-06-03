@@ -24,8 +24,8 @@ only; there is no Hugo variant (a static site has no backend to store edits).
 
 - **Public API surface.** `AssetsFS`, `PartialsFS`, `HeadTags`, and the `Field`
   type are public. The partial template names (`mdedit/display`, `mdedit/edit`,
-  `mdedit/preview`) and the `Field` field names are consumed by host templates —
-  renaming or removing is breaking. Adding fields is fine.
+  `mdedit/preview`, `mdedit/field`) and the `Field` field names are consumed by
+  host templates — renaming or removing is breaking. Adding fields is fine.
 - **The adapter seam contract** in `assets/mdedit.js` (`mdedit.register` and
   the controller shape: `getValue`/`setValue`/`sync`/`destroy`/`onChange`).
   Adapters and hosts depend on it.
@@ -62,6 +62,11 @@ Per the org standard: GitHub issue before branching (`feature/<n>` or
   exists) are **done**; this editor layers the UI on top.
 - **File load** (`Field.AllowFileLoad`) is shipped: load a local `.md` file
   into the editor client-side; never uploaded.
+- **Form-field partial** (`mdedit/field`, `Field.Name`) is shipped: a plain
+  editor for the host's own `<form>`, no inline lifecycle. Use it instead of
+  hand-rolling a `data-mdedit` textarea (which kept dropping the wrapper +
+  file-load — see [#20](https://github.com/infodancer/ui/issues/20),
+  [#21](https://github.com/infodancer/ui/issues/21)).
 - **Image support** is deferred and split three ways — `markdown` decides what
   `<img>`/`src` survives (a planned relative-only policy), mdedit inserts a
   `![](url)` reference (a future `Field.UploadURL` + adapter `imageUploadFunction`),

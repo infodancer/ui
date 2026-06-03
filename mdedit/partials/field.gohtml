@@ -1,0 +1,36 @@
+{{- /* mdedit/field — a Markdown editor as a single form field, for embedding in
+       the host's own <form> alongside other inputs with one submit button.
+
+       Unlike mdedit/edit this has no Save/Cancel/Preview lifecycle and no htmx:
+       the host form owns submission, and the textarea serializes under
+       Field.Name (default "markdown") on a normal POST. Use this when the editor
+       is one field among many (a "new note" form); use mdedit/edit when the
+       region edits itself inline via htmx.
+
+       The textarea is the source of truth and works with no JS; the client
+       adapter (data-mdedit) enhances it in place and keeps its value synced.
+       File load (AllowFileLoad) and image upload (UploadURL) behave exactly as
+       in mdedit/edit. The .mdedit-editing wrapper carries the editor chrome. */ -}}
+{{- define "mdedit/field" -}}
+<div class="mdedit mdedit-editing" id="mdedit-{{.ID}}">
+  {{- if .Label}}
+  <label class="mdedit-label" for="mdedit-ta-{{.ID}}">{{.Label}}</label>
+  {{- end}}
+  <textarea id="mdedit-ta-{{.ID}}" name="{{.Name}}" class="mdedit-textarea"
+            rows="{{.Rows}}"{{if .MaxLength}} maxlength="{{.MaxLength}}"{{end}}
+            data-mdedit data-mdedit-adapter="{{.Adapter}}" data-mdedit-toolbar="{{.Toolbar}}"
+            {{- if .UploadURL}} data-mdedit-upload="{{.UploadURL}}"{{end}}>{{.Markdown}}</textarea>
+  {{- if .AllowFileLoad}}
+  {{- /* Loads a local file into the textarea client-side (mdedit.js reads it and
+         never uploads it); it becomes the field value and rides the host form's
+         normal submit. Text only — image upload is the separate UploadURL path. */ -}}
+  <div class="mdedit-actions">
+    <label class="mdedit-load">Load file…
+      <input type="file" class="mdedit-load-input"
+             accept=".md,.markdown,text/markdown,text/plain"
+             data-mdedit-load="mdedit-ta-{{.ID}}">
+    </label>
+  </div>
+  {{- end}}
+</div>
+{{- end -}}
