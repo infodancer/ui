@@ -234,6 +234,25 @@ func TestHeadTags_EmitsPinnedSRI(t *testing.T) {
 	}
 }
 
+func TestHeadTags_CacheBustsEveryAsset(t *testing.T) {
+	out := string(HeadTags("/static/mdedit"))
+	// Every emitted asset URL must carry the ?v= fingerprint so a deploy that
+	// changes the JS/CSS is not masked by a browser's cached copy under the
+	// static mount's long max-age.
+	want := "?v=" + assetsHash
+	for _, asset := range []string{
+		"mdedit.css", "mdedit.js", "adapters/easymde.js",
+		"vendor/easymde.min.css", "vendor/easymde.min.js",
+	} {
+		if !strings.Contains(out, "/static/mdedit/"+asset+want) {
+			t.Errorf("asset %q missing cache-bust token %q in:\n%s", asset, want, out)
+		}
+	}
+	if assetsHash == "" {
+		t.Error("assetsHash is empty; fingerprint not computed")
+	}
+}
+
 func TestWithDefaults(t *testing.T) {
 	f := Field{}.WithDefaults()
 	if f.Adapter != "easymde" {
