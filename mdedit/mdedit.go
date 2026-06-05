@@ -22,7 +22,9 @@
 package mdedit
 
 import (
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -83,13 +85,47 @@ func PartialsFS() fs.FS {
 // loader by queuing its registration, so order is robust, not fragile.)
 func HeadTags(staticBase string) template.HTML {
 	b := strings.TrimRight(staticBase, "/")
+	v := "?v=" + assetsHash
 	var sb strings.Builder
-	fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s/vendor/easymde.min.css" integrity="%s" crossorigin="anonymous">`+"\n", b, easyMDECSSIntegrity)
-	fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s/mdedit.css">`+"\n", b)
-	fmt.Fprintf(&sb, `<script defer src="%s/vendor/easymde.min.js" integrity="%s" crossorigin="anonymous"></script>`+"\n", b, easyMDEJSIntegrity)
-	fmt.Fprintf(&sb, `<script defer src="%s/mdedit.js"></script>`+"\n", b)
-	fmt.Fprintf(&sb, `<script defer src="%s/adapters/easymde.js"></script>`+"\n", b)
+	fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s/vendor/easymde.min.css%s" integrity="%s" crossorigin="anonymous">`+"\n", b, v, easyMDECSSIntegrity)
+	fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s/mdedit.css%s">`+"\n", b, v)
+	fmt.Fprintf(&sb, `<script defer src="%s/vendor/easymde.min.js%s" integrity="%s" crossorigin="anonymous"></script>`+"\n", b, v, easyMDEJSIntegrity)
+	fmt.Fprintf(&sb, `<script defer src="%s/mdedit.js%s"></script>`+"\n", b, v)
+	fmt.Fprintf(&sb, `<script defer src="%s/adapters/easymde.js%s"></script>`+"\n", b, v)
 	return template.HTML(sb.String()) //nolint:gosec // fixed template, staticBase is host-controlled config
+}
+
+// assetsHash is a content fingerprint of every embedded asset, appended as
+// ?v= to the URLs in HeadTags. The static mount serves these with a long
+// max-age, so without a cache-busting token a browser keeps running the old
+// mdedit.js/css for the full TTL after a deploy — which silently masks fixes
+// (a stale loader made a note editor's submit button do nothing until users
+// hard-reloaded). The hash changes iff any asset byte changes, so each release
+// gets fresh URLs automatically; the host needs to do nothing.
+var assetsHash = computeAssetsHash()
+
+func computeAssetsHash() string {
+	h := sha256.New()
+	// fs.WalkDir visits in lexical order, so the digest is deterministic.
+	err := fs.WalkDir(assetsRoot, "assets", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		b, err := assetsRoot.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(h, "%s\x00%d\x00", path, len(b))
+		h.Write(b)
+		return nil
+	})
+	if err != nil {
+		panic("mdedit: computeAssetsHash: " + err.Error()) // unreachable: embedded FS
+	}
+	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
 // Field is the data a host handler passes to the mdedit partials. One Field
