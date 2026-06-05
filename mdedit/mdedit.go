@@ -118,7 +118,10 @@ func computeAssetsHash() string {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(h, "%s\x00%d\x00", path, len(b))
+		// path\x00 delimits each file's contribution so two files can't combine
+		// into the same digest input; content follows. (h.Write never errors.)
+		h.Write([]byte(path))
+		h.Write([]byte{0})
 		h.Write(b)
 		return nil
 	})
