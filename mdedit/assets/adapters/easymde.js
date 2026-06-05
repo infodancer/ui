@@ -124,6 +124,15 @@
       toolbar: profiles[opts.toolbar] || profiles.full,
       status: false,
       spellChecker: false,
+      // Keep the underlying <textarea> authoritative on every keystroke, not
+      // only when .value() is read. Without this EasyMDE mirrors the buffer
+      // back to the element on demand, so a plain (non-htmx) form submit
+      // serializes a STALE/empty textarea. If that textarea is `required`,
+      // the browser then blocks the submit on a hidden control with the
+      // unfocusable "invalid form control" error and nothing happens at all —
+      // no request, no message. The loader contract is that the adapter keeps
+      // the textarea current; forceSync is how this adapter honors it.
+      forceSync: true,
       // Belt and suspenders: even if a preview button slipped in, point it
       // at nothing useful — the server owns rendering.
       previewRender: function () {
@@ -156,6 +165,12 @@
       destroy: function () {
         // Restores the original <textarea> so htmx can cleanly remove it.
         editor.toTextArea();
+      },
+      focus: function () {
+        // Put the caret in the editor — the loader calls this when a required
+        // field is left empty, since the real <textarea> is hidden and can't
+        // take focus itself.
+        editor.codemirror.focus();
       },
       onChange: function (cb) {
         editor.codemirror.on("change", cb);

@@ -20,12 +20,17 @@
  *     sync(): void              // flush editor content into textarea.value
  *     destroy(): void           // tear down, restore the bare textarea
  *     onChange(cb): void        // optional; cb() on each edit (for live preview)
+ *     focus(): void             // optional; put the caret in the editor
  *   }
  *
  * Responsibilities the loader owns (so adapters stay thin):
  *   - enhancing [data-mdedit] textareas on load and after htmx swaps
  *   - flushing every editor's value into its textarea before any htmx
  *     request, so Save/Preview serialize current content
+ *   - flushing editors on a plain (non-htmx) <form> submit too, and taking
+ *     over `required` for hidden textareas — the editor hides the real
+ *     textarea, so native `required` would silently block submit on an
+ *     unfocusable control; the loader re-enforces it with a visible message
  *   - tearing down editors when htmx removes their element
  *   - wiring debounced server-side live preview when data-mdedit-live is set
  *   - wiring [data-mdedit-load] file inputs: read a local Markdown file in
@@ -160,6 +165,21 @@
     });
     ta._mdeditController = controller;
 
+    // The adapter has now replaced the textarea with its own editor surface and
+    // hidden the real <textarea>. A hidden control can't satisfy or display
+    // native constraint validation: an empty `required` textarea makes the
+    // browser refuse to submit with the unfocusable "invalid form control"
+    // error — silently, no request. So take over the requirement. Record it,
+    // strip the native attribute from the now-hidden field, and re-enforce it
+    // ourselves in the form's submit guard, where we can flush the editor
+    // first and surface a visible message. (If enhancement had failed above we
+    // return early and leave the visible textarea's native `required` intact.)
+    if (ta.required) {
+      ta.dataset.mdeditRequired = "1";
+      ta.required = false;
+    }
+    if (ta.form) guardForm(ta.form);
+
     if (live && controller.onChange) {
       var previewURL = ta.getAttribute("data-mdedit-preview-url");
       var target = ta.getAttribute("data-mdedit-preview-target");
@@ -196,6 +216,75 @@
     var nodes = document.querySelectorAll("textarea[data-mdedit]");
     for (var i = 0; i < nodes.length; i++) {
       if (nodes[i]._mdeditController) nodes[i]._mdeditController.sync();
+    }
+  }
+
+  // Plain (non-htmx) <form> submits never fire htmx:configRequest, so they
+  // would serialize without the configRequest flush above. guardForm closes
+  // that gap: it installs one capturing submit listener per form that flushes
+  // every mdedit editor in the form before the browser serializes it, and
+  // re-enforces the requirement we lifted off the hidden textareas in mountOne.
+  // Capture phase so we run before htmx's own bubble-phase submit handling.
+  function guardForm(form) {
+    if (form._mdeditGuard) return; // idempotent across re-enhancement
+    form._mdeditGuard = true;
+    form.addEventListener(
+      "submit",
+      function (e) {
+        var nodes = form.querySelectorAll("textarea[data-mdedit]");
+        var blocker = null;
+        for (var i = 0; i < nodes.length; i++) {
+          var ta = nodes[i];
+          if (ta._mdeditController) ta._mdeditController.sync();
+          clearError(ta);
+          if (ta.dataset.mdeditRequired === "1" && !ta.value.trim()) {
+            showError(ta, "This field is required.");
+            if (!blocker) blocker = ta;
+          }
+        }
+        if (blocker) {
+          e.preventDefault();
+          if (blocker._mdeditController && blocker._mdeditController.focus) {
+            blocker._mdeditController.focus();
+          }
+          var wrap = blocker.closest ? blocker.closest(".mdedit") : null;
+          if (wrap && wrap.scrollIntoView) {
+            wrap.scrollIntoView({ block: "center" });
+          }
+        }
+      },
+      true
+    );
+  }
+
+  // The required-field message lives in a module-owned node inside the editor
+  // wrapper (.mdedit), so it needs no host CSS and survives htmx swaps with the
+  // editor. clearError hides it; showError fills and reveals it.
+  function errorNode(ta) {
+    var wrap = ta.closest ? ta.closest(".mdedit") : null;
+    if (!wrap) return null;
+    var node = wrap.querySelector(".mdedit-error");
+    if (!node) {
+      node = document.createElement("p");
+      node.className = "mdedit-error";
+      node.setAttribute("role", "alert");
+      node.hidden = true;
+      wrap.appendChild(node);
+    }
+    return node;
+  }
+  function showError(ta, msg) {
+    var node = errorNode(ta);
+    if (!node) return;
+    node.textContent = msg;
+    node.hidden = false;
+  }
+  function clearError(ta) {
+    var wrap = ta.closest ? ta.closest(".mdedit") : null;
+    var node = wrap && wrap.querySelector(".mdedit-error");
+    if (node) {
+      node.textContent = "";
+      node.hidden = true;
     }
   }
 

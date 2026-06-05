@@ -15,6 +15,19 @@
   margin-block: var(--app-space, 1rem) 0;
 }
 
+/* Required-field message the loader reveals when a hidden mdedit textarea is
+   left empty on submit (native `required` can't show on a hidden control, so
+   the loader takes it over — see mdedit.js guardForm). Hidden until then via
+   the [hidden] attribute the loader toggles. */
+.mdedit-error {
+  margin-block: 0.375rem 0;
+  color: var(--app-color-danger, #b91c1c);
+  font-size: 0.875em;
+}
+.mdedit-error[hidden] {
+  display: none;
+}
+
 .mdedit-empty {
   color: var(--app-color-fg-muted, #6b7280);
   font-style: italic;
