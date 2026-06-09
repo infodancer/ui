@@ -543,6 +543,87 @@ a.app-nav-bell:hover,
   color: var(--app-color-fg-muted);
 }
 
+.app-pager-link {
+  text-decoration: none;
+  color: var(--app-color-accent);
+}
+
+.app-pager-pages {
+  list-style: none;
+  display: flex;
+  gap: var(--app-space-xs);
+  padding: 0;
+  margin: 0;
+}
+
+.app-pager-page {
+  display: inline-block;
+  min-width: 2rem;
+  padding: var(--app-space-xs) var(--app-space-sm);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
+  color: var(--app-color-fg);
+}
+
+.app-pager-page:hover {
+  border-color: var(--app-color-accent);
+}
+
+.app-pager-page.is-current {
+  background-color: var(--app-color-accent);
+  color: var(--app-color-accent-on);
+  border-color: var(--app-color-accent);
+}
+
+.app-pager-ellipsis {
+  padding: var(--app-space-xs) var(--app-space-sm);
+  color: var(--app-color-fg-muted);
+}
+
+/* --- Table ------------------------------------------------------------ */
+/* The ui/table partial (a sortable, paginated data table). The bare table  */
+/* rule above only sets block margin; .app-table adds the cell grid, header */
+/* rule, hover, and alignment variants. Header sort links reuse .app-sort.  */
+
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-table caption {
+  text-align: start;
+  color: var(--app-color-fg-muted);
+  margin-block-end: var(--app-space-sm);
+}
+
+.app-table th,
+.app-table td {
+  padding: var(--app-space-sm) var(--app-space);
+  text-align: start;
+  border-block-end: 1px solid var(--app-color-border);
+}
+
+.app-table thead th {
+  font-family: var(--app-font-display);
+  color: var(--app-color-fg);
+  border-block-end: 2px solid var(--app-color-border);
+}
+
+.app-table tbody tr:hover {
+  background-color: var(--app-color-bg-raised);
+  background-color: color-mix(in srgb, var(--app-color-accent) 6%, var(--app-color-bg));
+}
+
+.app-cell-end {
+  text-align: end;
+}
+
+.app-cell-center {
+  text-align: center;
+}
+
 /* --- Badge ------------------------------------------------------------ */
 /* Base badge styling. Color variants belong to consuming modules — they  */
 /* know which semantic states they care about (e.g. archived/accepted in  */

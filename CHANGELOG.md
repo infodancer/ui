@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.5.0 — 2026-06-08
+
+### Added
+- **`ui/table` — sortable, paginated data table (#32).** The heavier sibling of the `Pager`: `Column{Key,Label,Align}` + `SortState{Key,Dir}` describe the table, and `NewTable(base, q, cols, sort, rows, pager)` precomputes the header cells (sort URLs that flip direction on the active column and preserve every filter + the current page, `aria-sort`, alignment) so the `ui/table` partial stays logic-free. Cells are caller-rendered trusted `template.HTML`, the same model as `RenderDocument`'s body. The boundary mirrors the error renderers: `ui` owns the `<th>` sort markup, the `<table>`, and the pager; the consumer owns the sort whitelist (sortKey → safe `ORDER BY`, never interpolated), the SQL, and building the columns + rows. New `base.css`: `.app-table`, `.app-cell-end`/`.app-cell-center`, and the previously-unstyled `.app-pager-link`.
+- **`NumberedPager` — windowed jump-to-page strip.** `Pager` gains an additive `Pages []PageLink` field and a `NumberedPager(base, q, page, pageSize, total)` constructor that renders `1 … 5 6 [7] 8 9 … 23` (first + last + current ±2, single ellipsis per gap). It is opt-in: prev/next paging (`NewPager`) costs no `COUNT(*)`; only a view that wants numbered pages pays for the total. `NumberedPager` uses 1-based `?page=`; `NewPager` keeps `?offset=`. New `base.css`: `.app-pager-pages`, `.app-pager-page` (+`.is-current`), `.app-pager-ellipsis`.
+
+### Changed
+- **`ui/pager` partial renders a numbered strip when `Pager.Pages` is populated** (between the position and Next). Additive — prev/next-only pagers (`Pages` nil) render exactly as before.
+
 ## v0.4.4 — 2026-06-01
 
 ### Fixed
