@@ -1,8 +1,10 @@
 {{- /*
-  pager.gohtml — the ui/pager partial: a prev/next page nav for offset paging,
-  driven by a ui.Pager. Each side is rendered only when its URL is set, so the
-  first page shows no Prev and the last shows no Next. Uses ui's .app-pager /
-  .app-pager-pos classes. Drop it into a page with {{ template "ui/pager" .Pager }}.
+  pager.gohtml — the ui/pager partial: a page nav driven by a ui.Pager. Prev and
+  Next render only when their URL is set, so the first page shows no Prev and the
+  last shows no Next. When .Pages is populated (a numbered pager from
+  ui.NumberedPager) a windowed jump-to-page strip renders between the position
+  and Next; otherwise it's prev/next only. Uses ui's .app-pager* classes. Drop
+  it into a page with {{ template "ui/pager" .Pager }}.
 */ -}}
 {{ define "ui/pager" -}}
 <nav class="app-pager" aria-label="Pagination">
@@ -11,6 +13,21 @@
   {{- end }}
   {{- with .Position }}
   <span class="app-pager-pos">{{ . }}</span>
+  {{- end }}
+  {{- with .Pages }}
+  <ol class="app-pager-pages">
+    {{- range . }}
+    <li>
+      {{- if .URL }}
+      <a class="app-pager-page" href="{{ .URL }}">{{ .Label }}</a>
+      {{- else if .Current }}
+      <span class="app-pager-page is-current" aria-current="page">{{ .Label }}</span>
+      {{- else }}
+      <span class="app-pager-ellipsis" aria-hidden="true">{{ .Label }}</span>
+      {{- end }}
+    </li>
+    {{- end }}
+  </ol>
   {{- end }}
   {{- with .NextURL }}
   <a class="app-pager-link" href="{{ . }}" rel="next">Next →</a>

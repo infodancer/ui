@@ -1,0 +1,37 @@
+{{- /*
+  table.gohtml — the ui/table partial: a read-only sortable, paginated data
+  table driven by a ui.Table (build it with ui.NewTable). Header cells, sort
+  URLs, aria-sort and the pager are all precomputed in Go, so this template
+  only ranges and prints. Body cells are trusted template.HTML (the caller owns
+  escaping, same as ui.DocumentPage.Body). Drop it into a page with
+  {{ template "ui/table" .Table }}.
+*/ -}}
+{{ define "ui/table" -}}
+<table class="app-table">
+  {{- with .Caption }}
+  <caption>{{ . }}</caption>
+  {{- end }}
+  <thead>
+    <tr>
+      {{- range .Header }}
+      <th scope="col"{{ with .Align }} class="app-cell-{{ . }}"{{ end }} aria-sort="{{ .AriaSort }}">
+        {{- if .SortURL }}
+        <a class="app-sort{{ if .Active }} is-active{{ end }}" href="{{ .SortURL }}">{{ .Label }}</a>
+        {{- else }}{{ .Label }}{{ end }}
+      </th>
+      {{- end }}
+    </tr>
+  </thead>
+  <tbody>
+    {{- $align := .Align }}
+    {{- range .Rows }}
+    <tr>
+      {{- range $i, $cell := . }}
+      <td{{ with index $align $i }} class="app-cell-{{ . }}"{{ end }}>{{ $cell }}</td>
+      {{- end }}
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{ template "ui/pager" .Pager }}
+{{- end }}
