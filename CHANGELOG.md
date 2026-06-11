@@ -6,6 +6,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+### Added
+- **Hugo nav: multilevel dropdowns (#42).** The Hugo nav partial renders `.Site.Menus.main` entries that have children as the same native `<details class="app-nav-dropdown">` markup the Go variant emits (one level deep). A dropdown parent with its own URL is repeated as the first entry of its menu, since a `<summary>` can't also be a link. Flat link items now carry `.app-nav-item`, matching the Go variant's class hierarchy.
+- **Nav wraps on narrow viewports.** `.app-nav` and `.app-nav-links` gain `flex-wrap: wrap` so the bar degrades by wrapping instead of overflowing; ui still ships no hamburger by design.
+
+### Changed
+- **Hugo nav renders the auth area only when configured (#42).** Previously it always emitted a "Sign in" link defaulting to `/login`; now the auth block appears only when the site sets `.Site.Params.user` or `.Site.Params.ui.sign_in_url`. A public static site that sets neither gets no auth affordance. Sites relying on the implicit `/login` default must set `sign_in_url` explicitly.
+
 ## v0.5.0 — 2026-06-08
 
 ### Added
