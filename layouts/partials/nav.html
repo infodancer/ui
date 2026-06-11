@@ -4,26 +4,53 @@
   Reads from Hugo site config:
     .Site.Params.ui.brand_text     — brand mark text
     .Site.Params.ui.brand_url      — brand mark href (defaults to "/")
-    .Site.Menus.main               — primary nav links
+    .Site.Menus.main               — primary nav; entries with children render
+                                     as native <details> dropdowns
     .Site.Params.user              — optional logged-in user info
-    .Site.Params.ui.sign_in_url    — sign-in path (defaults to "/login")
+    .Site.Params.ui.sign_in_url    — sign-in path
+
+  The auth area renders only when the site configures it: a user (the name
+  span) or a sign_in_url (the "Sign in" link). A public static site that
+  configures neither gets no auth affordance at all.
+
+  Dropdowns mirror the Go variant's markup (.app-nav-dropdown / .app-nav-menu;
+  a parent with its own URL is repeated as the first menu entry, since a
+  <summary> can't also be a link). One level of nesting — deeper trees are
+  deferred until a consumer needs them.
 
   Consumers may pass a custom dot context; the partial degrades gracefully
   when fields are missing.
 */ -}}
 {{- $brand := .Site.Params.ui.brand_text | default .Site.Title -}}
 {{- $brandURL := .Site.Params.ui.brand_url | default "/" -}}
-{{- $signIn := .Site.Params.ui.sign_in_url | default "/login" -}}
+{{- $signIn := .Site.Params.ui.sign_in_url -}}
 {{- $user := .Site.Params.user -}}
 <nav class="app-nav" aria-label="Site">
   <a class="app-nav-brand" href="{{ $brandURL }}">{{ $brand }}</a>
   {{- with .Site.Menus.main }}
   <ul class="app-nav-links" role="list">
     {{- range . }}
-    <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+    {{- if .HasChildren }}
+    <li class="app-nav-item">
+      <details class="app-nav-dropdown">
+        <summary>{{ .Name }}</summary>
+        <ul class="app-nav-menu" role="list">
+          {{- if .URL }}
+          <li class="app-nav-item"><a href="{{ .URL }}">{{ .Name }}</a></li>
+          {{- end }}
+          {{- range .Children }}
+          <li class="app-nav-item"><a href="{{ .URL }}">{{ .Name }}</a></li>
+          {{- end }}
+        </ul>
+      </details>
+    </li>
+    {{- else }}
+    <li class="app-nav-item"><a href="{{ .URL }}">{{ .Name }}</a></li>
+    {{- end }}
     {{- end }}
   </ul>
   {{- end }}
+  {{- if or $user $signIn }}
   <div class="app-nav-auth">
     {{- if $user }}
     <span class="app-nav-user">{{ $user.display_name | default $user.email }}</span>
@@ -31,4 +58,5 @@
     <a href="{{ $signIn }}">Sign in</a>
     {{- end }}
   </div>
+  {{- end }}
 </nav>

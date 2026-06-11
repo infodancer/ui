@@ -238,6 +238,7 @@ button[disabled] {
 
 .app-nav {
   display: flex;
+  flex-wrap: wrap; /* narrow viewports degrade by wrapping; ui ships no hamburger */
   align-items: center;
   justify-content: space-between;
   gap: var(--app-space);
@@ -260,6 +261,7 @@ button[disabled] {
 
 .app-nav-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--app-space);
   list-style: none;
