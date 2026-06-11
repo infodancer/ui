@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.6.0 — 2026-06-11
+
 ### Added
 - **Hugo nav: multilevel dropdowns (#42).** The Hugo nav partial renders `.Site.Menus.main` entries that have children as the same native `<details class="app-nav-dropdown">` markup the Go variant emits (one level deep). A dropdown parent with its own URL is repeated as the first entry of its menu, since a `<summary>` can't also be a link. Flat link items now carry `.app-nav-item`, matching the Go variant's class hierarchy.
 - **Nav wraps on narrow viewports.** `.app-nav` and `.app-nav-links` gain `flex-wrap: wrap` so the bar degrades by wrapping instead of overflowing; ui still ships no hamburger by design.
