@@ -328,6 +328,8 @@ One aside panel of collapsible link sections. Each section is a native `<details
 
 **Two-sided layouts.** The `.app-sidebar-layout` grid takes an optional left and/or right aside; the consumer chooses both, either, or neither. The page adds `.has-left` / `.has-right` to the layout for each aside present and wraps each render in an `<aside class="app-sidebar app-sidebar-{left,right}">`, rendering `ui/sidebar` once per side with its own `SidebarData`. Neither modifier → full-width content.
 
+**Drawer mode (opt-in).** On narrow viewports the default layout stacks the asides into the content column. A consumer that wants them hidden behind toggle buttons instead — the off-canvas pattern — adds the `app-sidebar-layout--drawers` modifier, puts `popover` and an `id` on each aside, and renders a `<button class="app-sidebar-toggle" popovertarget="…">` wherever it fits (the label or glyph is the consumer's; ui ships no icons). The mechanism is the native Popover API, so the drawers get hidden-until-toggled, light dismiss, ESC-to-close, and a `::backdrop` with **no JavaScript** — consistent with the sidebar's no-JS `<details>` sections. Wide viewports neutralize the popover UA styles so the asides sit inline in the grid exactly as the default layout. Browsers without Popover support ignore the attribute and fall back to stacking, and the toggles only appear under `@supports selector(:popover-open)` — the drawer is progressive enhancement over the stack.
+
 **Go data shape:**
 
 ```go
