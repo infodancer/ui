@@ -487,3 +487,54 @@ func equalStrings(a, b []string) bool {
 	}
 	return true
 }
+
+// --- Action tracking ---------------------------------------------------------
+
+func TestTrackAttrs(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		item ui.MenuItem
+		want string
+	}{
+		{"untracked item renders nothing", ui.MenuItem{Key: "home"}, ""},
+		{"event only", ui.MenuItem{Track: "signin_start"}, ` data-track="signin_start"`},
+		{"data sorted by key",
+			ui.MenuItem{Track: "search", TrackData: map[string]string{"scope": "campaigns", "category": "search"}},
+			` data-track="search" data-track-category="search" data-track-scope="campaigns"`},
+		{"values attribute-escaped",
+			ui.MenuItem{Track: `ev"<il>`, TrackData: map[string]string{"k": `v"<&>`}},
+			` data-track="ev&#34;&lt;il&gt;" data-track-k="v&#34;&lt;&amp;&gt;"`},
+		{"keys normalized to attribute alphabet",
+			ui.MenuItem{Track: "ev", TrackData: map[string]string{"Sub Type_2!": "x"}},
+			` data-track="ev" data-track-subtype-2="x"`},
+		{"key with nothing usable is skipped",
+			ui.MenuItem{Track: "ev", TrackData: map[string]string{"!!!": "x"}},
+			` data-track="ev"`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := string(tc.item.TrackAttrs()); got != tc.want {
+				t.Errorf("TrackAttrs() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestNav_RendersTrackAttributes(t *testing.T) {
+	t.Parallel()
+	out := renderNav(t, ui.NavData{
+		Items: []ui.MenuItem{
+			{Key: "signin", Label: "Sign in", URL: "/login",
+				Track: "signin_start", TrackData: map[string]string{"category": "auth"}},
+			{Key: "home", Label: "Home", URL: "/"},
+		},
+	})
+	if !strings.Contains(out, `<a href="/login" data-track="signin_start" data-track-category="auth">Sign in</a>`) {
+		t.Errorf("tracked link missing data-track attributes\n--- got ---\n%s", out)
+	}
+	if !strings.Contains(out, `<a href="/">Home</a>`) {
+		t.Errorf("untracked link should render without tracker attributes\n--- got ---\n%s", out)
+	}
+}

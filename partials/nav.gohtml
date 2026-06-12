@@ -70,7 +70,7 @@
     </ul>
   </details>
   {{- else -}}
-  <a class="app-nav-bell" href="{{ .URL }}"{{ with .Badge }}{{ if .Label }} aria-label="{{ .Label }}"{{ end }}{{ end }}>{{ template "ui/nav-glyph" . }}</a>
+  <a class="app-nav-bell" href="{{ .URL }}"{{ .TrackAttrs }}{{ with .Badge }}{{ if .Label }} aria-label="{{ .Label }}"{{ end }}{{ end }}>{{ template "ui/nav-glyph" . }}</a>
   {{- end -}}
 </li>
 {{- else if .Children -}}
@@ -79,14 +79,14 @@
     <summary>{{ .Label }}</summary>
     <ul class="app-nav-menu" role="list">
       {{- if .URL }}
-      <li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
+      <li class="app-nav-item"><a href="{{ .URL }}"{{ .TrackAttrs }}>{{ .Label }}</a></li>
       {{- end }}
       {{- range .Children }}{{ template "ui/nav-item" . }}{{- end }}
     </ul>
   </details>
 </li>
 {{- else -}}
-<li class="app-nav-item"><a href="{{ .URL }}">{{ .Label }}</a></li>
+<li class="app-nav-item"><a href="{{ .URL }}"{{ .TrackAttrs }}>{{ .Label }}</a></li>
 {{- end -}}
 {{- end }}
 

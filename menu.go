@@ -3,8 +3,11 @@ package ui
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
+	"maps"
 	"slices"
+	"strings"
 )
 
 // Viewer carries everything the menu gate logic needs about the current
@@ -123,6 +126,16 @@ type MenuItem struct {
 	Gate     Gate       `json:"gate,omitzero" yaml:"gate,omitempty"`
 	Children []MenuItem `json:"children,omitempty" yaml:"children,omitempty"`
 
+	// Track and TrackData wire the item into ui's action tracker (track.js),
+	// honoring its contract that a new action costs an HTML attribute, not
+	// JavaScript. Track is the event name, emitted as data-track on the
+	// rendered link; each TrackData entry becomes a data-track-<key> event
+	// property (track.js turns hyphens back into underscores when it builds
+	// the payload). The consumer owns the vocabulary — ui only carries the
+	// attributes. An item with no Track renders exactly as before.
+	Track     string            `json:"track,omitempty" yaml:"track,omitempty"`
+	TrackData map[string]string `json:"trackData,omitempty" yaml:"trackData,omitempty"`
+
 	// Badge is live, per-request state (an unread count, a status dot) the
 	// host attaches after [Resolve] — never part of static config, hence no
 	// struct tags. A nil Badge renders no badge.
@@ -133,6 +146,44 @@ type MenuItem struct {
 	// inert (the bell a signed-in non-admin sees). The partial styles it with
 	// .app-nav-bell--muted and emits no link.
 	Muted bool `json:"-" yaml:"-"`
+}
+
+// TrackAttrs renders the item's tracker wiring as ready-made HTML attributes
+// for the nav partial: a leading space, data-track, then the TrackData pairs
+// in sorted key order (deterministic output), or "" for an untracked item.
+// The return type opts out of contextual auto-escaping, so values are
+// attribute-escaped here, and keys — which land in attribute-name position,
+// where escaping can't help — are normalized to the attribute alphabet
+// instead: lowercased, '_' mapped to '-', everything else outside [a-z0-9-]
+// dropped, and the key skipped entirely when nothing survives.
+func (m MenuItem) TrackAttrs() template.HTMLAttr {
+	if m.Track == "" {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString(` data-track="` + template.HTMLEscapeString(m.Track) + `"`)
+	for _, k := range slices.Sorted(maps.Keys(m.TrackData)) {
+		key := normalizeTrackKey(k)
+		if key == "" {
+			continue
+		}
+		b.WriteString(` data-track-` + key + `="` + template.HTMLEscapeString(m.TrackData[k]) + `"`)
+	}
+	return template.HTMLAttr(b.String()) //nolint:gosec // escaped/normalized above
+}
+
+// normalizeTrackKey reduces a TrackData key to the data-attribute alphabet.
+func normalizeTrackKey(k string) string {
+	var b strings.Builder
+	for _, r := range strings.ToLower(k) {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9', r == '-':
+			b.WriteRune(r)
+		case r == '_':
+			b.WriteRune('-')
+		}
+	}
+	return strings.Trim(b.String(), "-")
 }
 
 // Badge is the detectable state on an item, typically a KindIcon. Count is the
