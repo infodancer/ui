@@ -10,7 +10,7 @@ on:
 
 jobs:
   checks:
-    uses: infodancer/workflows/.github/workflows/go-ci.yml@v0.2.0
+    uses: infodancer/workflows/.github/workflows/go-ci.yml@v0
     with:
       modules: '[".", "markdown", "mdedit"]'
       # GO-2026-5037: the actions/go-versions manifest still lags 1.26.4, so pin
