@@ -1,0 +1,19 @@
+name: CI
+
+# Thin caller: the static-analysis quartet (vet/fmt/lint/govulncheck) lives in
+# infodancer/workflows. Tests stay in test.yml because they cover a different
+# module set (the mdedit spike example) than lint/govulncheck do.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  checks:
+    uses: infodancer/workflows/.github/workflows/go-ci.yml@v0.2.0
+    with:
+      modules: '[".", "markdown", "mdedit"]'
+      # GO-2026-5037: the actions/go-versions manifest still lags 1.26.4, so pin
+      # govulncheck's toolchain until it catches up (see go-ci.yml).
+      govulncheck_go_version: "1.26.4"
+      run_tests: false
