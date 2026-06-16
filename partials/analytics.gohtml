@@ -3,8 +3,12 @@
 
   Renders the optional web-analytics <head> scripts from a ui.Analytics (or a
   struct with the same shape):
-    Umami     *Umami      // {Src, WebsiteID}; nil emits nothing
+    Umami     *Umami      // {Src, WebsiteID, Performance, Replay}; nil emits nothing
     Plausible *Plausible  // {Src};            nil emits nothing
+
+  Umami.Performance (default false) adds data-performance="true" for Core Web
+  Vitals; Umami.Replay (default false) also loads recorder.js for session
+  replay/heatmaps (which also need Umami's per-website toggle).
 
   ui owns the markup; the consumer passes its own script URLs and IDs — no
   property-specific values are baked into the toolkit. A nil member emits
@@ -14,7 +18,10 @@
 */ -}}
 {{ define "ui/analytics" -}}
 {{- with .Umami }}
-<script defer src="{{ .Src }}" data-website-id="{{ .WebsiteID }}"></script>
+<script defer src="{{ .Src }}" data-website-id="{{ .WebsiteID }}"{{ if .Performance }} data-performance="true"{{ end }}></script>
+{{- if .Replay }}
+<script defer src="{{ .RecorderSrc }}" data-website-id="{{ .WebsiteID }}"></script>
+{{- end }}
 {{- end }}
 {{- with .Plausible }}
 <script async src="{{ .Src }}"></script>

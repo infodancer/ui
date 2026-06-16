@@ -1,6 +1,9 @@
 package ui
 
-import "html/template"
+import (
+	"html/template"
+	"strings"
+)
 
 // DocumentData is the documented data shape for the `ui/document` partial —
 // the "Layer 2" base document skeleton. It renders a complete <html> page that
@@ -63,9 +66,28 @@ type Analytics struct {
 // Umami configures the Umami analytics tag. Src is the tracker script URL
 // (e.g. "https://analytics.example.net/script.js"); WebsiteID is the
 // data-website-id for the tracked property.
+//
+// Performance and Replay are opt-in (default false): Performance adds
+// data-performance="true" so the tracker collects Core Web Vitals; Replay
+// additionally loads Umami's recorder.js for session replay and heatmaps,
+// which both require the per-website "Replays & Heatmaps" toggle in Umami and
+// record visitor sessions -- leave it off unless that privacy posture is
+// intended.
 type Umami struct {
-	Src       string
-	WebsiteID string
+	Src         string
+	WebsiteID   string
+	Performance bool
+	Replay      bool
+}
+
+// RecorderSrc returns the session-replay recorder script URL, derived from Src
+// by swapping the tracker filename for recorder.js (Umami serves the recorder
+// at the same origin and path). Used only when Replay is true.
+func (u Umami) RecorderSrc() string {
+	if i := strings.LastIndex(u.Src, "/"); i >= 0 {
+		return u.Src[:i+1] + "recorder.js"
+	}
+	return "recorder.js"
 }
 
 // Plausible configures the Plausible analytics tag. Src is the script URL for
