@@ -48,6 +48,55 @@ func TestAnalytics_RendersUmamiAndPlausible(t *testing.T) {
 	}
 }
 
+func TestAnalytics_UmamiPerformanceAndReplay(t *testing.T) {
+	t.Parallel()
+	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Defaults (Performance/Replay false): no data-performance, no recorder.js.
+	var off bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&off, "ui/analytics", &ui.Analytics{
+		Umami: &ui.Umami{Src: "https://analytics.example.net/script.js", WebsiteID: "abc-123"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if out := off.String(); strings.Contains(out, "data-performance") || strings.Contains(out, "recorder.js") {
+		t.Errorf("defaults should not emit performance/recorder, got:\n%s", out)
+	}
+
+	// Both enabled: performance attribute on the tracker tag, plus a recorder.js
+	// tag whose URL is derived from Src (same origin/path) with the same id.
+	var on bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&on, "ui/analytics", &ui.Analytics{
+		Umami: &ui.Umami{Src: "https://analytics.example.net/script.js", WebsiteID: "abc-123", Performance: true, Replay: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`<script defer src="https://analytics.example.net/script.js" data-website-id="abc-123" data-performance="true"></script>`,
+		`<script defer src="https://analytics.example.net/recorder.js" data-website-id="abc-123"></script>`,
+	} {
+		if !strings.Contains(on.String(), want) {
+			t.Errorf("analytics output missing %q\n--- got ---\n%s", want, on.String())
+		}
+	}
+}
+
+func TestUmami_RecorderSrc(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct{ src, want string }{
+		{"https://analytics.example.net/script.js", "https://analytics.example.net/recorder.js"},
+		{"https://a.example.net/path/custom.js", "https://a.example.net/path/recorder.js"},
+		{"script.js", "recorder.js"},
+	} {
+		if got := (ui.Umami{Src: tc.src}).RecorderSrc(); got != tc.want {
+			t.Errorf("RecorderSrc(%q) = %q, want %q", tc.src, got, tc.want)
+		}
+	}
+}
+
 func TestAnalytics_NilMembersOmit(t *testing.T) {
 	t.Parallel()
 	tmpl, err := template.ParseFS(ui.PartialsFS(), "*.gohtml")
