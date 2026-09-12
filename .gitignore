@@ -8,3 +8,8 @@ coverage.txt
 # consumers' vendor dirs and can disturb downstream workspace resolution).
 /go.work
 /go.work.sum
+
+# Built example binaries. `go build` in an example directory drops one next to
+# its source, and a 14 MB artifact was committed that way once already.
+/examples/go-consumer/go-consumer
+/mdedit/examples/spike/spike
