@@ -1,6 +1,6 @@
 module github.com/infodancer/ui/examples/go-consumer
 
-go 1.25.10
+go 1.25.11
 
 require github.com/infodancer/ui v0.0.0
 
