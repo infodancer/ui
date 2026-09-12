@@ -1,0 +1,6 @@
+github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
+github.com/felixge/httpsnoop v1.1.0/go.mod h1:Zqxgdd+1Rkcz8euOqdr7lqgCRJztwr5hp9vDSi5UZCE=
+github.com/infodancer/logging v0.1.3 h1:1sws1WX71KQWanjVOtgJejS1/FIsdWkTSY3CnwkSc2E=
+github.com/infodancer/logging v0.1.3/go.mod h1:aVD4A4VXYdVgRgjNuKgUBRtaQGcydF8DXqf/UWIkbY4=
+github.com/infodancer/logging/httplog v0.1.1 h1:6BPA7zRQaEyz7i9RcyeEtDEqU7ptp+oelHZ5i1bm11k=
+github.com/infodancer/logging/httplog v0.1.1/go.mod h1:mloHIlKZcl9ISGDPSJilwLC37MFCofJS1LxYVRlPrpQ=

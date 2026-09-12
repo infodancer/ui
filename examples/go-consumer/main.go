@@ -18,10 +18,12 @@ package main
 
 import (
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/infodancer/logging"
+	"github.com/infodancer/logging/httplog"
 	"github.com/infodancer/ui"
 )
 
@@ -60,12 +62,21 @@ type viewData struct {
 }
 
 func main() {
+	// Logging is the house standard rather than the standard library's log
+	// package: logfmt with lowercased levels, and one access log line per
+	// request from the shared middleware. A consumer copying this example
+	// gets a server that is legible to a log pipeline from the first run.
+	logger := logging.NewLogger(getenv("LOG_LEVEL", "info"))
+	slog.SetDefault(logger)
+
 	tmpl, err := template.New("base").Parse(basePage)
 	if err != nil {
-		log.Fatalf("parse base: %v", err)
+		logger.Error("parsing the base template failed", "err", err)
+		os.Exit(1)
 	}
 	if _, err := tmpl.ParseFS(ui.PartialsFS(), "*.gohtml"); err != nil {
-		log.Fatalf("parse ui partials: %v", err)
+		logger.Error("parsing the ui partials failed", "err", err)
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
@@ -98,14 +109,22 @@ func main() {
 			},
 		}
 		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-			log.Printf("execute: %v", err)
+			// Headers are already out by the time a template fails midway, so
+			// there is nothing to tell the client: the log is the only report.
+			logger.Error("executing the page template failed", "err", err)
 		}
 	})
 
 	addr := ":" + getenv("PORT", "8080")
-	log.Printf("listening on http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
-		log.Fatal(err)
+	srv := &http.Server{
+		Addr:     addr,
+		Handler:  httplog.Middleware(logger)(mux),
+		ErrorLog: httplog.ErrorLog(logger),
+	}
+	logger.Info("listening", "url", "http://localhost"+addr)
+	if err := srv.ListenAndServe(); err != nil {
+		logger.Error("server stopped", "err", err)
+		os.Exit(1)
 	}
 }
 
