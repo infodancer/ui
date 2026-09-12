@@ -94,9 +94,12 @@ func main() {
 			Nav: ui.NavData{
 				BrandText: "Example",
 				BrandURL:  "/",
-				Links: []ui.NavLink{
-					{Label: "Browse", URL: "/browse"},
-					{Label: "About", URL: "/about"},
+				// Items rather than the deprecated flat Links list: this is
+				// the API a new consumer should copy, and it is what gating,
+				// dropdowns and icon items hang off.
+				Items: []ui.MenuItem{
+					{Key: "browse", Label: "Browse", URL: "/browse"},
+					{Key: "about", Label: "About", URL: "/about"},
 				},
 			},
 			Footer: ui.FooterData{
