@@ -23,12 +23,15 @@ import (
 	"embed"
 	"html/template"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 
 	uiassets "github.com/infodancer/ui"
 
+	"github.com/infodancer/logging"
+	"github.com/infodancer/logging/httplog"
 	"github.com/infodancer/ui/markdown"
 	"github.com/infodancer/ui/mdedit"
 )
@@ -121,11 +124,18 @@ func (rg *region) routes(mux *http.ServeMux) {
 func (rg *region) exec(w http.ResponseWriter, name string, data any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := rg.tpl.ExecuteTemplate(w, name, data); err != nil {
-		log.Printf("execute %s: %v", name, err)
+		// The response is already partly written, so the log is the only
+		// place this can be reported.
+		slog.Error("executing a template failed", "template", name, "err", err)
 	}
 }
 
 func main() {
+	// House logging, as in examples/go-consumer: logfmt with lowercased
+	// levels, plus one access line per request from the shared middleware.
+	logger := logging.NewLogger(os.Getenv("LOG_LEVEL"))
+	slog.SetDefault(logger)
+
 	tpl := template.Must(template.New("page").Parse(pageHTML))
 	template.Must(tpl.ParseFS(mdedit.PartialsFS(), "*.gohtml"))
 
@@ -147,7 +157,7 @@ func main() {
 			"Doc":     document.field(),
 			"Comment": comment.field(),
 		}); err != nil {
-			log.Printf("page: %v", err)
+			slog.Error("executing the page template failed", "err", err)
 		}
 	})
 	document.routes(mux)
@@ -158,8 +168,16 @@ func main() {
 	mux.Handle("/static/spike/", http.StripPrefix("/static/spike/", http.FileServer(http.FS(spikeStatic))))
 
 	addr := "localhost:8099"
-	log.Printf("mdedit spike on http://%s", addr)
-	log.Fatal(http.ListenAndServe(addr, mux))
+	srv := &http.Server{
+		Addr:     addr,
+		Handler:  httplog.Middleware(logger)(mux),
+		ErrorLog: httplog.ErrorLog(logger),
+	}
+	logger.Info("mdedit spike listening", "url", "http://"+addr)
+	if err := srv.ListenAndServe(); err != nil {
+		logger.Error("server stopped", "err", err)
+		os.Exit(1)
+	}
 }
 
 const docSeed = "# mdedit spike\n\nClick **Edit**. The toolbar is EasyMDE; the *preview* and the saved\noutput both come from the server's markdown package (goldmark + bluemonday).\n\nTry pasting `<script>alert(1)</script>` and previewing — it is stripped.\n\n| feature | state |\n|---------|-------|\n| GFM tables | on |\n"
