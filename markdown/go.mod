@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/yuin/goldmark v1.8.2
-	golang.org/x/net v0.55.0
+	golang.org/x/net v0.62.0
 )
 
 require (
