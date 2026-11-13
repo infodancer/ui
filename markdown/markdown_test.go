@@ -35,6 +35,11 @@ var xssCorpus = []struct {
 	// Strict/Rich). Inert escaped text is harmless, as for the plain script case
 	// above — TestFootnotes_BodySanitizedUnderRich covers the live-element path.
 	{"footnote body script", "ref[^a]\n\n[^a]: <script>alert(1)</script>", []string{"<script"}},
+	// Image alt text allows sentence punctuation (TestImageAlt_KeepsPunctuation),
+	// so it must still be impossible to close the attribute or the tag from it,
+	// in Markdown alt text or in a raw-HTML alt.
+	{"markdown alt quote breakout", `![a" onerror="alert(1)](/x.png)`, []string{` onerror="`}},
+	{"raw alt tag breakout", `<img src="/x.png" alt='"><script>alert(1)</script>'>`, []string{"<script"}},
 }
 
 func TestPresets_XSSCorpusNeutralized(t *testing.T) {
@@ -63,6 +68,31 @@ func TestRender_PreservesSafeMarkdown(t *testing.T) {
 	for _, want := range []string{"<h1", "Title", "<strong>bold", "<em>italic", "<code>code", `href="https://example.com"`, "<li>one"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("expected %q in output, got:\n%s", want, got)
+		}
+	}
+}
+
+// bluemonday's UGCPolicy matches img alt against its Paragraph pattern, which
+// has no colon, semicolon, question mark, quote, ampersand or asterisk, and
+// drops the whole attribute when one appears. Alt text is a sentence; it
+// should survive with its punctuation.
+func TestImageAlt_KeepsPunctuation(t *testing.T) {
+	for name, r := range map[string]*Renderer{"Strict": New(Strict()), "Rich": New(Rich())} {
+		for _, alt := range []string{
+			"The board at the end of the night: four skeletons",
+			"Torches out; the stairs dark",
+			"Who goes there?",
+			"Salt & pepper",
+			"A *starred* note",
+		} {
+			got := r.RenderString("![" + alt + "](/x.png)")
+			if !strings.Contains(got, ` alt="`) {
+				t.Errorf("%s: alt dropped for %q: %s", name, alt, got)
+			}
+		}
+		got := r.RenderString(`![She said "run"](/x.png)`)
+		if !strings.Contains(got, `alt="She said &#34;run&#34;"`) {
+			t.Errorf("%s: quoted alt not kept escaped: %s", name, got)
 		}
 	}
 }
