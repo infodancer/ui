@@ -292,6 +292,13 @@ func buildPolicy(opts Options) *bluemonday.Policy {
 		// goldmark emits and strips script/style/iframe/object/embed/form
 		// plus every on* event-handler attribute.
 		p = bluemonday.UGCPolicy()
+		// UGCPolicy matches img alt against bluemonday's Paragraph pattern,
+		// which has no colon, semicolon, question mark, quote or ampersand,
+		// and drops the attribute outright when one appears. Alt text is a
+		// sentence, so allow any text that cannot open or close a tag.
+		// Attribute values are re-escaped on output, so a quote in the value
+		// cannot end the attribute.
+		p.AllowAttrs("alt").Matching(altTextPattern).OnElements("img")
 	}
 	if len(opts.ExtraElements) > 0 {
 		p.AllowElements(opts.ExtraElements...)
@@ -305,6 +312,10 @@ func buildPolicy(opts Options) *bluemonday.Policy {
 	}
 	return p
 }
+
+// altTextPattern is the img alt allowlist: anything but angle brackets and
+// control characters (tab, newline and carriage return are allowed).
+var altTextPattern = regexp.MustCompile(`^[^<>\x00-\x08\x0B\x0C\x0E-\x1F\x7F]*$`)
 
 // Footnote markup is a closed set: goldmark renders ids from the note's numeric
 // index (strconv.Itoa), so fnref:N / fnrefK:N (references, K = a repeat ref's
