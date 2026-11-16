@@ -31,11 +31,17 @@ const (
 	htmxSRI = "sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
 )
 
-// HeadTags returns the <script> tag that loads the vendored htmx library, with
-// a Subresource Integrity hash so the browser rejects a tampered file. Place it
-// in your page <head>. staticBase is the URL prefix where you mounted
-// [AssetsFS] (e.g. "/static/ui", with or without a trailing slash); the script
-// is served from "<staticBase>/js/<file>".
+// HeadTags returns the tags that load the vendored htmx library: a config
+// <meta> and the <script>, with a Subresource Integrity hash so the browser
+// rejects a tampered file. Place it in your page <head>. staticBase is the URL
+// prefix where you mounted [AssetsFS] (e.g. "/static/ui", with or without a
+// trailing slash); the script is served from "<staticBase>/js/<file>".
+//
+// The meta turns off htmx's built-in indicator styles. htmx would otherwise
+// inject a <style> element at load, which a Content-Security-Policy that
+// forbids inline style blocks refuses. The equivalent rules ship in base.css
+// (.htmx-indicator and .htmx-request); a consumer that does not load base.css
+// and uses hx-indicator must carry those rules itself.
 //
 //	mux.Handle("/static/ui/", http.StripPrefix("/static/ui/", http.FileServer(http.FS(ui.AssetsFS()))))
 //	// in the page <head>: {{ .HTMXHead }}  where HTMXHead = ui.HeadTags("/static/ui")
@@ -46,7 +52,8 @@ const (
 func HeadTags(staticBase string) template.HTML {
 	base := strings.TrimRight(staticBase, "/")
 	return template.HTML(fmt.Sprintf(
-		`<script src="%s/js/%s" integrity="%s" crossorigin="anonymous" defer></script>`,
+		`<meta name="htmx-config" content='{"includeIndicatorStyles":false}'>`+
+			`<script src="%s/js/%s" integrity="%s" crossorigin="anonymous" defer></script>`,
 		template.HTMLEscapeString(base), htmxFilename, htmxSRI,
 	))
 }
