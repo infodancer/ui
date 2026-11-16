@@ -77,6 +77,40 @@ func TestHeadTags(t *testing.T) {
 	}
 }
 
+// TestHeadTagsDisableInlineIndicatorStyles: htmx otherwise injects a <style>
+// element at load, which a policy that forbids inline style blocks. HeadTags
+// must switch that off, and base.css must carry the same rules instead.
+func TestHeadTagsDisableInlineIndicatorStyles(t *testing.T) {
+	tag := string(ui.HeadTags("/static/ui"))
+	meta := `<meta name="htmx-config" content='{"includeIndicatorStyles":false}'>`
+	i := strings.Index(tag, meta)
+	if i < 0 {
+		t.Fatalf("HeadTags missing the htmx-config meta in: %s", tag)
+	}
+	if j := strings.Index(tag, "<script"); j < i {
+		t.Errorf("htmx-config meta must precede the script in: %s", tag)
+	}
+
+	f, err := ui.AssetsFS().Open("css/base.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = f.Close() }()
+	css, err := io.ReadAll(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		".htmx-indicator",
+		".htmx-request .htmx-indicator",
+		".htmx-request.htmx-indicator",
+	} {
+		if !strings.Contains(string(css), want) {
+			t.Errorf("base.css missing %q", want)
+		}
+	}
+}
+
 func TestRequestHelpers(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	if ui.IsRequest(r) {
