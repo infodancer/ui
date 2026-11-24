@@ -35,9 +35,9 @@
 
 /* --- buttons -------------------------------------------------------- */
 
-/* The lifecycle buttons carry base.css's .app-btn (Save) and .app-btn
-   .app-btn-secondary (Edit, Cancel, Preview), so they match the host page's
-   other buttons. The mdedit-* classes on them are hooks, not styling. */
+/* The lifecycle buttons carry base.css's .app-btn (Edit, Save) and .app-btn
+   .app-btn-secondary (Cancel, Preview), so they match the host page's other
+   buttons. The mdedit-* classes on them are hooks, not styling. */
 
 /* --- edit form ------------------------------------------------------ */
 
