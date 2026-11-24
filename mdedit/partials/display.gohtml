@@ -6,7 +6,7 @@
     {{- if .HTML}}{{.HTML}}{{else}}<p class="mdedit-empty">Nothing here yet.</p>{{end -}}
   </div>
   {{- if .EditURL}}
-  <button type="button" class="mdedit-edit-btn"
+  <button type="button" class="app-btn app-btn-secondary mdedit-edit-btn"
           hx-get="{{.EditURL}}" hx-target="#mdedit-{{.ID}}" hx-swap="outerHTML">Edit</button>
   {{- end}}
 </div>

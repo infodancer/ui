@@ -20,11 +20,11 @@
               {{- if .UploadURL}} data-mdedit-upload="{{.UploadURL}}"{{end}}
               {{- if .LivePreview}} data-mdedit-live="1"{{end}}>{{.Markdown}}</textarea>
     <div class="mdedit-actions">
-      <button type="submit" class="mdedit-save">Save</button>
-      <button type="button" class="mdedit-cancel"
+      <button type="submit" class="app-btn mdedit-save">Save</button>
+      <button type="button" class="app-btn app-btn-secondary mdedit-cancel"
               hx-get="{{.DisplayURL}}" hx-target="#mdedit-{{.ID}}" hx-swap="outerHTML">Cancel</button>
       {{- if .PreviewURL}}
-      <button type="button" class="mdedit-preview-btn"
+      <button type="button" class="app-btn app-btn-secondary mdedit-preview-btn"
               hx-post="{{.PreviewURL}}" hx-include="#mdedit-ta-{{.ID}}"
               hx-target="#mdedit-preview-{{.ID}}" hx-swap="innerHTML">Preview</button>
       {{- end}}

@@ -322,3 +322,30 @@ func TestEdit_ToolbarProfileRenders(t *testing.T) {
 		t.Errorf("explicit toolbar profile should render, got:\n%s", out)
 	}
 }
+
+// The lifecycle buttons wear the library's own button classes (base.css
+// .app-btn / .app-btn-secondary), so an Edit or Save in an mdedit region looks
+// like every other button on the host page. Save is the primary action; Edit,
+// Cancel and Preview are secondary. The mdedit-* classes stay as hooks.
+func TestButtons_UseSharedButtonClasses(t *testing.T) {
+	tpl := parseAll(t)
+	f := Field{
+		ID: "b", EditURL: "/e", SaveURL: "/s", DisplayURL: "/d", PreviewURL: "/p",
+	}.WithDefaults()
+
+	display := render(t, tpl, "mdedit/display", f)
+	if !strings.Contains(display, `class="app-btn app-btn-secondary mdedit-edit-btn"`) {
+		t.Errorf("edit button lacks the shared secondary button classes:\n%s", display)
+	}
+
+	edit := render(t, tpl, "mdedit/edit", f)
+	for _, want := range []string{
+		`class="app-btn mdedit-save"`,
+		`class="app-btn app-btn-secondary mdedit-cancel"`,
+		`class="app-btn app-btn-secondary mdedit-preview-btn"`,
+	} {
+		if !strings.Contains(edit, want) {
+			t.Errorf("edit form missing %q:\n%s", want, edit)
+		}
+	}
+}
