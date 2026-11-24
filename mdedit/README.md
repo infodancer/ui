@@ -27,9 +27,10 @@ import "github.com/infodancer/ui/markdown" // the render/sanitize pipeline
 | `Field` | The data shape those partials render — current Markdown, rendered HTML, and the four loop URLs. |
 | `HeadTags(base)` | The `<link>`/`<script>` tags (with SRI) for your page `<head>`. |
 
-The partials' buttons (Edit, Save, Cancel, Preview) use the root module's
-`base.css` button classes, `.app-btn` and `.app-btn-secondary`, so they look
-like the rest of the page's buttons. Load `base.css` alongside `mdedit.css`.
+The partials' buttons use the root module's `base.css` button classes: Edit
+and Save are `.app-btn` (primary), Cancel and Preview `.app-btn
+.app-btn-secondary`. They look like the rest of the page's buttons. Load
+`base.css` alongside `mdedit.css`.
 
 ## The loop
 
