@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+## v0.6.3 — 2026-11-16
+
 ### Fixed
 - **htmx no longer injects an inline `<style>`.** `HeadTags` now emits `<meta name="htmx-config" content='{"includeIndicatorStyles":false}'>` ahead of the script, and `base.css` carries the `.htmx-indicator` / `.htmx-request` rules htmx would have injected. Under a Content-Security-Policy that forbids inline style blocks the injected element was refused and `hx-indicator` elements never hid or showed. A consumer that uses `hx-indicator` without `base.css` must carry those rules itself.
 
