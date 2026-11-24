@@ -35,34 +35,9 @@
 
 /* --- buttons -------------------------------------------------------- */
 
-.mdedit-edit-btn,
-.mdedit-save,
-.mdedit-cancel,
-.mdedit-preview-btn {
-  font: inherit;
-  cursor: pointer;
-  border-radius: var(--app-radius-sm, 4px);
-  padding: var(--app-space-xs, 0.25rem) var(--app-space-sm, 0.5rem);
-  border: 1px solid var(--app-color-border, #d1d5db);
-  background: var(--app-color-bg-raised, #f9fafb);
-  color: var(--app-color-fg, #111827);
-}
-
-.mdedit-save {
-  border-color: var(--app-color-accent, #2563eb);
-  background: var(--app-color-accent, #2563eb);
-  color: var(--app-color-accent-on, #fff);
-}
-
-.mdedit-save:hover {
-  background: var(--app-color-accent-hover, #1d4ed8);
-}
-
-.mdedit-edit-btn:hover,
-.mdedit-cancel:hover,
-.mdedit-preview-btn:hover {
-  border-color: var(--app-color-accent, #2563eb);
-}
+/* The lifecycle buttons carry base.css's .app-btn (Save) and .app-btn
+   .app-btn-secondary (Edit, Cancel, Preview), so they match the host page's
+   other buttons. The mdedit-* classes on them are hooks, not styling. */
 
 /* --- edit form ------------------------------------------------------ */
 

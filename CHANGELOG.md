@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Unt
 
 ## Unreleased
 
+### Changed
+- **mdedit buttons use the shared button classes.** The Edit, Save, Cancel and Preview buttons in the `mdedit/display` and `mdedit/edit` partials now carry `.app-btn` (Save) and `.app-btn .app-btn-secondary` (the others) from `base.css`, so an mdedit region's buttons match every other button on the page. Previously `mdedit.css` gave them their own smaller look. `mdedit.css` no longer styles buttons; the `mdedit-*` classes remain as hooks. A consumer that loads `mdedit.css` without `base.css` now gets unstyled buttons.
+
 ## v0.6.3 — 2026-11-16
 
 ### Fixed
